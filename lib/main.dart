@@ -1,9 +1,20 @@
-import 'dart:js';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_app2/hive_helper.dart';
 import 'package:flutter_app2/songs.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hive/hive.dart';
+import 'package:path_provider/path_provider.dart';
 
-void main() {
+////////initilizingHIveinAPPinMAIN,8:14AM,16/3/2021
+///
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final appDir = await getApplicationDocumentsDirectory();
+  await Hive.initFlutter(appDir.path);
+  Hive.registerAdapter(
+    HivehelperAdapter(),
+  );
+  Hive.openBox('Musicbox');
   runApp(MyApp());
 }
 
@@ -12,7 +23,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'Flutter Demo',
+        title: '',
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
@@ -38,30 +49,30 @@ class HomePage extends StatelessWidget {
             child: Column(children: [
               Container(
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(50),
+                    borderRadius: BorderRadius.circular(100),
                     color: Colors.white),
                 child: CircleAvatar(
-                  radius: 50,
+                  radius: 100,
                   backgroundImage: NetworkImage(
-                      "https://i.pinimg.com/originals/ca/76/0b/ca760b70976b52578da88e06973af542.jpg"),
+                      "https://ak.picdn.net/shutterstock/videos/14229665/thumb/1.jpg"),
                 ),
               ),
               Divider(
                 height: 30,
               ),
               Text(
-                "listen to your",
+                "Listen to your",
                 style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 55,
-                    color: Colors.white),
+                    fontSize: 65,
+                    color: Colors.green),
               ),
               Text(
                 "Favourites.",
                 style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 55,
-                    color: Colors.white),
+                    fontSize: 65,
+                    color: Colors.green),
               ),
               Divider(
                 height: 30,
@@ -70,6 +81,7 @@ class HomePage extends StatelessWidget {
           ),
         ],
       ),
+      backgroundColor: Colors.black,
     );
   }
 }
