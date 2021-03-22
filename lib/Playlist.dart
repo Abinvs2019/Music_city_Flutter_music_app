@@ -1,10 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app2/hive_helper.dart';
-import 'package:flutter_app2/music_playing.dart';
 import 'package:flutter_audio_query/flutter_audio_query.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:flutter_app2/songsagain.dart';
 
 class Playlist extends StatefulWidget {
   Function changeTrack;
@@ -19,7 +19,6 @@ class _PlaylistState extends State<Playlist> {
   List<SongInfo> songs = [];
   int currentIndex = 0;
   String playlistBox;
-  final GlobalKey<MusicPlayerState> key = GlobalKey<MusicPlayerState>();
 
   @override
   Widget build(BuildContext context) {
@@ -55,14 +54,7 @@ Widget _buildListView() {
               icon: Icon(Icons.delete),
               onPressed: () {},
             ),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => MusicPlayer(),
-                ),
-              );
-            },
+            onTap: () {},
           );
         },
       );

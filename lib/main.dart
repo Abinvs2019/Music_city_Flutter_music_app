@@ -1,6 +1,8 @@
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app2/Playlist.dart';
 import 'package:flutter_app2/hive_helper.dart';
-import 'package:flutter_app2/songs.dart';
+import 'package:flutter_app2/songsagain.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
@@ -23,7 +25,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: '',
+        title: 'Flutter Demo',
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
@@ -37,7 +39,7 @@ class HomePage extends StatelessWidget {
     void homePageChange() async {
       await Future.delayed(const Duration(seconds: 2), () {});
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => Songs()));
+          context, MaterialPageRoute(builder: (context) => SongsAgain()));
     }
 
     homePageChange();
