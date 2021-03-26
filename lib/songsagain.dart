@@ -599,13 +599,15 @@ class SongsStateagain extends State<SongsAgain>
 
               // savedList.keys.contains(widget.songInfo.id);
 
-              // print(songs[currentIndex]);
+              var songFav = SongPlayList()..songInfo = songs[currentIndex].id;
+
               // print(songs[currentIndex].id);
-              // var songFav = SongPlayList(songInfo: widget.songInfo.id);
-              // print("current indes of songs $songFav");
-              // savedList.put(widget.songInfo.id, songFav);
-              // print("saved lisysavedList");
               // print(songFav);
+              print(songs[currentIndex].id);
+
+              savedList.put(songs[currentIndex].id, songFav);
+
+              print("saved lisysavedList");
 
               Scaffold.of(context).showSnackBar(
                 SnackBar(

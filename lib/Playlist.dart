@@ -24,7 +24,7 @@ class _PlaylistState extends State<Favourites> {
   ///List of  SongsId
   List<String> songIds = [];
   getData() async {
-    _songList = await Hive.openBox('myBox');
+    _songList = await Hive.openBox('Musicbox');
     print("Started");
     print(_songList);
     _songList.values.forEach((songId) {
