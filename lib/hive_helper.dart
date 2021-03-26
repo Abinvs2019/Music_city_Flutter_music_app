@@ -1,20 +1,11 @@
 import 'package:hive/hive.dart';
-
 part 'hive_helper.g.dart';
 
-@HiveType(typeId: 0)
-class Hive_helper {
+@HiveType(typeId: 1)
+class SongPlayList extends HiveObject {
   @HiveField(0)
-  final String title;
-  @HiveField(1)
-  final String detail;
+  String songInfo;
 
-  Hive_helper({this.title, this.detail});
+  @HiveField(1)
+  int songId;
 }
-//
-//
-//
-//haveChangedNothingTOSONGINFO////////
-//
-//stringsonginfo
-//stringSoNGID

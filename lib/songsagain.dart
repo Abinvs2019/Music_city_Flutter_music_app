@@ -1,42 +1,56 @@
 import 'dart:io';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_app2/Playlist.dart';
+import 'package:flutter_app2/Playlist/playlist.dart';
 import 'package:flutter_app2/hive_helper.dart';
+import 'package:flutter_app2/search.dart';
 import 'package:flutter_audio_query/flutter_audio_query.dart';
 import 'package:flutter_media_notification/flutter_media_notification.dart';
 import 'package:hive/hive.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
+import 'package:vs_scrollbar/vs_scrollbar.dart';
 
 class SongsAgain extends StatefulWidget {
   SongInfo songInfo;
-  final GlobalKey<_SongsStateagain> key;
+  final GlobalKey<SongsStateagain> key;
+
   SongsAgain({
     this.songInfo,
     this.key,
   }) : super(key: key);
 
   @override
-  _SongsStateagain createState() => _SongsStateagain();
+  SongsStateagain createState() => SongsStateagain();
 }
 
-class _SongsStateagain extends State<SongsAgain> {
+class SongsStateagain extends State<SongsAgain>
+    with SingleTickerProviderStateMixin {
+  final ScrollController _scroll = ScrollController();
+  final TextEditingController _searchText = new TextEditingController();
   final FlutterAudioQuery audioQuery = FlutterAudioQuery();
-  final GlobalKey<_SongsStateagain> key = GlobalKey<_SongsStateagain>();
+  final GlobalKey<SongsStateagain> key = GlobalKey<SongsStateagain>();
   final AudioPlayer player = AudioPlayer();
   List<SongInfo> songs = [];
+  final pi = 3.14;
   bool isPlaying = false;
   double minmumvalue = 0.0, maximumvalue = 0.0, currentvalue = 0.0;
   String currentTime = '', endTime = '';
   int currentIndex = 0;
   String status = 'hidden';
+  AnimationController _animControl;
 
   void initState() {
+    _animControl =
+        AnimationController(vsync: this, duration: Duration(seconds: 2));
+    isPlaying != null ? _animControl.repeat() : _animControl.repeat();
     super.initState();
     print("Init CurrentINdex $currentIndex");
     getTracks();
     print("got track");
+    changeState();
   }
 
   void getTracks() async {
@@ -86,15 +100,23 @@ class _SongsStateagain extends State<SongsAgain> {
 
     isPlaying = false;
     changeState();
-    player.positionStream.listen((duration) {
-      currentvalue = duration.inMilliseconds.toDouble();
-      setState(() {
-        currentTime = getDuration(currentvalue);
-        if (currentvalue >= maximumvalue) {
-          return changeTrack(true);
-        }
-      });
-    });
+    player.positionStream.listen(
+      (duration) {
+        currentvalue = duration.inMilliseconds.toDouble();
+        setState(
+          () {
+            currentTime = getDuration(currentvalue);
+            if (currentvalue >= maximumvalue) {
+              return changeTrack(true);
+            }
+          },
+        );
+      },
+    );
+    MediaNotification.showNotification(
+      title: songs[currentIndex].title,
+      author: songs[currentIndex].artist,
+    );
   }
 
   String getDuration(double value) {
@@ -115,10 +137,6 @@ class _SongsStateagain extends State<SongsAgain> {
     } else {
       player.pause();
     }
-    // MediaNotification.showNotification(
-    //   title: widget.songInfo.title,
-    //   author: widget.songInfo.artist,
-    // );
   }
 
   changeTrack(bool isNext) {
@@ -142,17 +160,32 @@ class _SongsStateagain extends State<SongsAgain> {
   void dispose() {
     super.dispose();
     player?.dispose();
+    _animControl.dispose();
   }
 
-  void addMusic(Hive_helper musicName) {
-    final musicBox = Hive.box('Musicbox');
-    musicBox.add(musicName);
+  // void addMusic(SongPlayList musicName, ids) {
+  //   final musicBox = Hive.box('Musicbox');
+  //   musicBox.add(musicName);
+  // }
+
+  var savedList;
+
+  Future initiateHive() async {
+    ///Creating a HiveBox to Store data
+    savedList = await Hive.openBox('Musicbox');
+  }
+
+  searhSong() async {
+    songs = await audioQuery.searchSongs(query: _searchText.text);
   }
 
   @override
   Widget build(context) {
     return Scaffold(
       appBar: AppBar(
+          actions: <Widget>[
+            IconButton(icon: Icon(Icons.search), onPressed: () {})
+          ],
           backgroundColor: Colors.black,
           leading: Icon(Icons.music_note, color: Colors.green),
           title: Text(
@@ -177,49 +210,107 @@ class _SongsStateagain extends State<SongsAgain> {
             minHeight: 100,
             // color: Colors.black,
             maxHeight: 1000,
-            margin: const EdgeInsets.all(24.0),
+            margin: const EdgeInsets.all(22.0),
             panel: Container(
-              padding: EdgeInsets.fromLTRB(0, 100, 0, 0),
+              padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
               child: Column(
                 children: <Widget>[
                   Container(
-                    padding: EdgeInsets.fromLTRB(0, 150, 0, 0),
+                    padding: EdgeInsets.fromLTRB(0, 70, 0, 0),
                     child: Column(
                       children: <Widget>[
                         Container(
                           child: Column(
                             children: [
-                              CircleAvatar(
-                                backgroundImage: songs[
-                                                currentIndex]
-                                            .albumArtwork ==
-                                        null
-                                    ? AssetImage(
-                                        'android/assets/images/Apple-Music-artist-promo.jpg')
-                                    : FileImage(
-                                        File(songs[currentIndex].albumArtwork)),
-                                radius: 150,
-                              ),
                               Container(
-                                padding: EdgeInsets.fromLTRB(30, 10, 30, 5),
-                                margin: EdgeInsets.fromLTRB(30, 10, 0, 30),
-                                child: Text(
-                                  songs[currentIndex].title,
-                                  style: TextStyle(
-                                      color: Colors.green,
-                                      fontSize: 16.0,
-                                      fontWeight: FontWeight.bold),
+                                height: 60,
+                                width: 350,
+                                padding: EdgeInsets.fromLTRB(5, 10, 5, 5),
+                                margin: EdgeInsets.fromLTRB(30, 10, 0, 0),
+                                child: Center(
+                                  child: Text(
+                                    songs[currentIndex].title,
+                                    style: TextStyle(
+                                        color: Colors.green,
+                                        fontSize: 16.0,
+                                        fontWeight: FontWeight.bold),
+                                  ),
                                 ),
                               ),
                               Container(
+                                height: 50,
+                                width: 200,
                                 margin: EdgeInsets.fromLTRB(0, 0, 0, 15),
-                                child: Text(
-                                  songs[currentIndex].artist,
-                                  style: TextStyle(
-                                      color: Colors.green,
-                                      fontSize: 12.0,
-                                      fontWeight: FontWeight.bold),
+                                child: Center(
+                                  child: Text(
+                                    songs[currentIndex].artist,
+                                    style: TextStyle(
+                                        color: Colors.green,
+                                        fontSize: 12.0,
+                                        fontWeight: FontWeight.bold),
+                                  ),
                                 ),
+                              ),
+                            ],
+                          ),
+                          // color: Colors.amber,
+                        ),
+                        SizedBox(
+                          height: 30,
+                          width: 500,
+                        ),
+                        Container(
+                          child: Column(
+                            children: [
+                              IconButton(
+                                padding: EdgeInsets.fromLTRB(350, 0, 0, 0),
+                                icon: Icon(Icons.favorite_border_outlined),
+                                color: Colors.green,
+                                onPressed: () {
+                                  // final newMusic = SongPlayList()
+                                  //   ..songInfo = songs[currentIndex].id;
+                                  // print("object");
+                                  // print(newMusic);
+                                  // addMusic(newMusic, songs[currentIndex].id);
+                                  // savedList.keys
+                                  //     .contains(songs[currentIndex].id);
+
+                                  var songFav = SongPlayList()
+                                    ..songInfo = songs[currentIndex].id;
+
+                                  // print(songs[currentIndex].id);
+                                  // print(songFav);
+                                  print(songs[currentIndex].id);
+
+                                  savedList.put(
+                                      songs[currentIndex].id, songFav);
+
+                                  print("saved lisysavedList");
+                                },
+                              ),
+                              AnimatedBuilder(
+                                animation: _animControl.view,
+                                builder: (context, child) {
+                                  return Transform.rotate(
+                                    angle: _animControl.value * 3 * pi,
+                                    child: child,
+                                  );
+                                },
+                                child: CircleAvatar(
+                                  backgroundImage: songs[currentIndex]
+                                              .albumArtwork ==
+                                          null
+                                      ? AssetImage(
+                                          'android/assets/images/gramaphoneIm.jpeg')
+                                      : FileImage(File(
+                                          songs[currentIndex].albumArtwork)),
+                                  radius: 150,
+                                ),
+                              ),
+                              // ),
+                              SizedBox(
+                                height: 100,
+                                width: 100,
                               ),
                               Slider(
                                 inactiveColor: Colors.green,
@@ -244,9 +335,10 @@ class _SongsStateagain extends State<SongsAgain> {
                                 transform: Matrix4.translationValues(0, -5, 0),
                                 margin: EdgeInsets.fromLTRB(5, 0, 5, 15),
                                 child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
                                   children: [
+                                    SizedBox(
+                                      width: 20,
+                                    ),
                                     Text(
                                       currentTime,
                                       style: TextStyle(
@@ -254,13 +346,19 @@ class _SongsStateagain extends State<SongsAgain> {
                                           fontSize: 12.0,
                                           fontWeight: FontWeight.bold),
                                     ),
+                                    SizedBox(
+                                      width: 342,
+                                    ),
                                     Text(
                                       endTime,
                                       style: TextStyle(
                                           color: Colors.green,
                                           fontSize: 12.0,
                                           fontWeight: FontWeight.bold),
-                                    )
+                                    ),
+                                    SizedBox(
+                                      width: 20,
+                                    ),
                                   ],
                                 ),
                               ),
@@ -313,50 +411,80 @@ class _SongsStateagain extends State<SongsAgain> {
             ),
             collapsed: Container(
               child: Padding(
-                padding: EdgeInsets.fromLTRB(0, 0, 0, 18),
-                child: Row(
+                padding: EdgeInsets.fromLTRB(0, 15, 0, 18),
+                child: Column(
                   children: [
-                    IconButton(
-                      icon: Icon(
-                        Icons.skip_previous_outlined,
-                        size: 50,
-                      ),
-                      onPressed: () {
-                        changeTrack(true);
-                        print("ChangeTrackTrueCalled");
-                      },
+                    Row(
+                      children: [
+                        Container(
+                          child: Row(
+                            children: [
+                              IconButton(
+                                icon: Icon(
+                                  Icons.skip_previous_outlined,
+                                  size: 50,
+                                ),
+                                onPressed: () {
+                                  changeTrack(true);
+                                  print("ChangeTrackTrueCalled");
+                                },
+                              ),
+                              IconButton(
+                                icon: Icon(
+                                    isPlaying
+                                        ? Icons.pause_circle_filled_rounded
+                                        : Icons.play_circle_fill_rounded,
+                                    color: Colors.red,
+                                    size: 50),
+                                onPressed: () {
+                                  changeState();
+                                },
+                              ),
+                              IconButton(
+                                icon: Icon(
+                                  Icons.skip_next_outlined,
+                                  size: 50,
+                                ),
+                                onPressed: () {
+                                  changeTrack(false);
+                                  print("ChangeTrackFalseCalled");
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          width: 5,
+                          height: 5,
+                        ),
+                        Container(
+                          width: 250,
+                          child: Column(
+                            children: [
+                              SizedBox(
+                                width: 6.5,
+                                height: 6.5,
+                              ),
+                              Text(
+                                songs[currentIndex].title.trimRight(),
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                              Text(
+                                songs[currentIndex].artist,
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Icon(Icons.arrow_upward),
+                      ],
                     ),
-                    IconButton(
-                      icon: Icon(
-                          isPlaying
-                              ? Icons.pause_circle_filled_rounded
-                              : Icons.play_circle_fill_rounded,
-                          color: Colors.red,
-                          size: 50),
-                      onPressed: () {
-                        changeState();
-                      },
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        Icons.skip_next_outlined,
-                        size: 50,
-                      ),
-                      onPressed: () {
-                        changeTrack(false);
-                        print("ChangeTrackFalseCalled");
-                      },
-                    ),
-                    SizedBox(width: 250, height: 20),
-                    Text(
-                      "",
-                      style: TextStyle(
-                        fontSize: 20,
-                        color: Colors.grey,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Icon(Icons.arrow_upward),
                   ],
                 ),
               ),
@@ -364,7 +492,7 @@ class _SongsStateagain extends State<SongsAgain> {
           )
         ],
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.black,
       bottomNavigationBar: BottomNavigationBar(
         items: [
           BottomNavigationBarItem(
@@ -381,84 +509,125 @@ class _SongsStateagain extends State<SongsAgain> {
             icon: GestureDetector(
               onTap: () {
                 Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => Playlist()));
+                    MaterialPageRoute(builder: (context) => Favourites()));
               },
               child: Icon(
                 Icons.favorite,
                 color: Colors.green,
               ),
             ),
-            title: new Text(
+            title: Text(
               'favorite',
               style: TextStyle(color: Colors.green),
             ),
           ),
           BottomNavigationBarItem(
-            icon: Icon(
-              Icons.playlist_play,
-              color: Colors.green,
+            icon: GestureDetector(
+              onTap: () {
+                Navigator.push(context,
+                    (MaterialPageRoute(builder: (context) => SearchScreen())));
+              },
+              child: Icon(
+                Icons.search,
+                color: Colors.green,
+              ),
             ),
             title: Text(
-              'playlist',
+              'Search',
               style: TextStyle(color: Colors.green),
             ),
           ),
           BottomNavigationBarItem(
-            icon: Icon(
-              Icons.settings,
-              color: Colors.green,
+            icon: GestureDetector(
+              onTap: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => PlaylistO()));
+              },
+              child: Icon(
+                Icons.playlist_play,
+                color: Colors.green,
+              ),
             ),
-            title: Text('Settings', style: TextStyle(color: Colors.green)),
-          )
+            title: Text(
+              'favorite',
+              style: TextStyle(color: Colors.green),
+            ),
+          ),
         ],
       ),
     );
   }
 
   Widget _buildListViewSongs() {
-    return ListView.separated(
-      separatorBuilder: (context, index) => Divider(),
-      itemCount: songs.length,
-      itemBuilder: (context, index) => ListTile(
-        leading: CircleAvatar(
-          backgroundImage: songs[index].albumArtwork == null
-              ? AssetImage('android/assets/images/Apple-Music-artist-promo.jpg')
-              : FileImage(File(songs[index].albumArtwork)),
-        ),
-        title: Text(
-          songs[index].title,
-          style: TextStyle(color: Colors.black),
-        ),
-        subtitle:
-            Text(songs[index].artist, style: TextStyle(color: Colors.black)),
-        trailing: IconButton(
-          icon: Icon(
-            Icons.favorite_outline,
-            color: Colors.green,
-          ),
-          onPressed: () async {
-            final newMusic = Hive_helper(
-                title: songs[index].title, detail: songs[index].artist);
-            addMusic(newMusic);
+    return VsScrollbar(
+      color: Colors.green,
+      scrollDirection: Axis.horizontal,
+      isAlwaysShown: true,
+      thickness: 10,
+      controller: _scroll,
+      scrollbarFadeDuration: Duration(milliseconds: 500),
+      scrollbarTimeToFade:
+          Duration(milliseconds: 800), // default : Duration(milliseconds: 600)
 
-            Scaffold.of(context).showSnackBar(
-              SnackBar(
-                content: Text("Added to Favorite"),
-              ),
+      child: ListView.separated(
+        controller: _scroll,
+        separatorBuilder: (context, index) => Divider(),
+        itemCount: songs.length,
+        itemBuilder: (context, index) => ListTile(
+          leading: CircleAvatar(
+            backgroundImage: songs[index].albumArtwork == null
+                ? AssetImage(
+                    'android/assets/images/Apple-Music-artist-promo.jpg')
+                : FileImage(File(songs[index].albumArtwork)),
+          ),
+          title: Text(
+            songs[index].title,
+            style: TextStyle(color: Colors.white),
+          ),
+          subtitle:
+              Text(songs[index].artist, style: TextStyle(color: Colors.white)),
+          trailing: IconButton(
+            icon: Icon(
+              Icons.favorite_outline,
+              color: Colors.green,
+            ),
+            onPressed: () {
+              // print("object");
+              // final newMusic = Hive_helper(songinfo: songs[currentIndex].id);
+              // addMusic(newMusic);
+              // print(newMusic);
+
+              // savedList.keys.contains(widget.songInfo.id);
+
+              // print(songs[currentIndex]);
+              // print(songs[currentIndex].id);
+              // var songFav = SongPlayList(songInfo: widget.songInfo.id);
+              // print("current indes of songs $songFav");
+              // savedList.put(widget.songInfo.id, songFav);
+              // print("saved lisysavedList");
+              // print(songFav);
+
+              Scaffold.of(context).showSnackBar(
+                SnackBar(
+                  content: Text("Added to Favorite"),
+                ),
+              );
+            },
+          ),
+          onTap: () {
+            currentIndex = index;
+            print("index $index");
+            print("current index $currentIndex");
+            SongsAgain(
+              key: key,
+              songInfo: songs[currentIndex],
+            );
+            print(key);
+            setSong(
+              songs[currentIndex],
             );
           },
         ),
-        onTap: () {
-          currentIndex = index;
-          print("index $index");
-          print("current index $currentIndex");
-          SongsAgain(
-            key: key,
-            songInfo: songs[currentIndex],
-          );
-
-          setSong(songs[currentIndex]);
-        },
       ),
     );
   }

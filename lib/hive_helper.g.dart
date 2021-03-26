@@ -6,30 +6,29 @@ part of 'hive_helper.dart';
 // TypeAdapterGenerator
 // **************************************************************************
 
-class HivehelperAdapter extends TypeAdapter<Hive_helper> {
+class SongPlayListAdapter extends TypeAdapter<SongPlayList> {
   @override
-  final int typeId = 0;
+  final int typeId = 1;
 
   @override
-  Hive_helper read(BinaryReader reader) {
+  SongPlayList read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return Hive_helper(
-      title: fields[0] as String,
-      detail: fields[1] as String,
-    );
+    return SongPlayList()
+      ..songInfo = fields[0] as String
+      ..songId = fields[1] as int;
   }
 
   @override
-  void write(BinaryWriter writer, Hive_helper obj) {
+  void write(BinaryWriter writer, SongPlayList obj) {
     writer
       ..writeByte(2)
       ..writeByte(0)
-      ..write(obj.title)
+      ..write(obj.songInfo)
       ..writeByte(1)
-      ..write(obj.detail);
+      ..write(obj.songId);
   }
 
   @override
@@ -38,7 +37,7 @@ class HivehelperAdapter extends TypeAdapter<Hive_helper> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is HivehelperAdapter &&
+      other is SongPlayListAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

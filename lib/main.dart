@@ -1,6 +1,4 @@
-import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app2/Playlist.dart';
 import 'package:flutter_app2/hive_helper.dart';
 import 'package:flutter_app2/songsagain.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -13,10 +11,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final appDir = await getApplicationDocumentsDirectory();
   await Hive.initFlutter(appDir.path);
-  Hive.registerAdapter(
-    HivehelperAdapter(),
-  );
-  Hive.openBox('Musicbox');
+  Hive.registerAdapter<SongPlayList>(SongPlayListAdapter());
+  var box = await Hive.openBox('Musicbox');
   runApp(MyApp());
 }
 
@@ -37,7 +33,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     void homePageChange() async {
-      await Future.delayed(const Duration(seconds: 2), () {});
+      await Future.delayed(const Duration(seconds: 3), () {});
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (context) => SongsAgain()));
     }
