@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app2/hive_helper.dart';
-import 'package:flutter_app2/songsagain.dart';
+import 'package:flutter_app2/model/hive_helper.dart';
+import 'package:flutter_app2/Screens/songsagain.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';

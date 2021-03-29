@@ -1,13 +1,15 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app2/hive_helper.dart';
+import 'package:flutter_app2/player/player.dart';
 import 'package:flutter_audio_query/flutter_audio_query.dart';
 import 'package:hive/hive.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:flutter_app2/songsagain.dart';
+import 'package:flutter_app2/Screens/songsagain.dart';
 
 class Favourites extends StatefulWidget {
+  SongInfo songInfo;
+  final GlobalKey<MusicPlayerState> key;
+  Favourites({this.key});
   @override
   _PlaylistState createState() => _PlaylistState();
 }
@@ -15,7 +17,7 @@ class Favourites extends StatefulWidget {
 class _PlaylistState extends State<Favourites> {
   final FlutterAudioQuery audioQuery = FlutterAudioQuery();
   int currentIndex = 0;
-  final GlobalKey<SongsStateagain> key = GlobalKey<SongsStateagain>();
+  final GlobalKey<MusicPlayerState> key = GlobalKey<MusicPlayerState>();
 
   var _songList;
 
@@ -104,7 +106,7 @@ class _PlaylistState extends State<Favourites> {
             child: Text(
               'Playlist',
               style: TextStyle(
-                  color: Colors.white38,
+                  color: Colors.white,
                   fontSize: 30,
                   fontWeight: FontWeight.bold),
             ),
@@ -129,10 +131,11 @@ class _PlaylistState extends State<Favourites> {
                       ),
                       title: Text(
                         songs[index].title,
+                        style: TextStyle(color: Colors.white),
                       ),
                       subtitle: Text(
                         songs[index].artist,
-                        style: TextStyle(color: Colors.blueGrey),
+                        style: TextStyle(color: Colors.white),
                       ),
                       trailing: IconButton(
                         splashColor: Colors.red,
@@ -148,17 +151,28 @@ class _PlaylistState extends State<Favourites> {
                         },
                       ),
                       onTap: () {
+                        Navigator.push(
+                          context,
+                          (MaterialPageRoute(
+                            builder: (context) => MusicPlayer(
+                              key: key,
+                              songInfo: songs[currentIndex],
+                            ),
+                          )),
+                        );
                         currentIndex = index;
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) =>
-                                SongsAgain(songInfo: songs[index], key: key)));
+                        MusicPlayer(
+                          songInfo: songs[currentIndex],
+                          key: key,
+                        );
+                        print(currentIndex);
                       },
                     ),
                   )
                 : Padding(
                     padding: const EdgeInsets.only(top: 100),
                     child: Text(
-                      "Empty",
+                      "No favourites for you...?",
                     ),
                   ),
           )

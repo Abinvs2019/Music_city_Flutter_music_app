@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_audio_query/flutter_audio_query.dart';
+import 'package:hive/hive.dart';
 import 'package:vs_scrollbar/vs_scrollbar.dart';
 
 class PlaylistSong extends StatefulWidget {
@@ -8,70 +9,73 @@ class PlaylistSong extends StatefulWidget {
 }
 
 class _PlaylistSongState extends State<PlaylistSong> {
-  List<PlaylistInfo> playlist = [];
-  final ScrollController _scroll = ScrollController();
-  final FlutterAudioQuery audioQuery = FlutterAudioQuery();
-  List<SongInfo> songs = [];
+  String playListName;
 
-  getSongs() async {
-    songs = await audioQuery.getSongs();
-  }
-
-  getPlaylist() async {
-    playlist = await audioQuery.getPlaylists();
-  }
-
-  getPlaySongs() async {
-    songs = await audioQuery.getSongsFromPlaylist(playlist: playlist[0]);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    playlist = playlist;
+  getPlaylistName(String name) {
+    playListName = name;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _buildListViewSongs(),
-    );
-  }
-
-  Widget _buildListViewSongs() {
-    return VsScrollbar(
-      color: Colors.green,
-      scrollDirection: Axis.horizontal,
-      isAlwaysShown: true,
-      thickness: 10,
-      controller: _scroll,
-      scrollbarFadeDuration: Duration(milliseconds: 500),
-      scrollbarTimeToFade:
-          Duration(milliseconds: 800), // default : Duration(milliseconds: 600)
-
-      child: ListView.separated(
-        controller: _scroll,
-        separatorBuilder: (context, index) => Divider(),
-        itemCount: playlist.length,
-        itemBuilder: (context, index) => ListTile(
-          leading: CircleAvatar(
-              backgroundImage: AssetImage(
-                  'android/assets/images/Apple-Music-artist-promo.jpg')),
-          title: Text(
-            playlist[index].name,
-            style: TextStyle(color: Colors.white),
-          ),
-          subtitle: Text(playlist[index].creationDate,
-              style: TextStyle(color: Colors.white)),
-          trailing: IconButton(
-            icon: Icon(
-              Icons.favorite_outline,
-              color: Colors.green,
+      backgroundColor: Colors.black,
+      body: Column(
+        children: [
+          Container(
+            margin: EdgeInsets.only(top: 45, left: 16),
+            alignment: Alignment.topLeft,
+            padding: EdgeInsets.only(left: 10),
+            child: Text(
+              'Playlist',
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold),
             ),
-            onPressed: () {},
           ),
-          onTap: () {},
-        ),
+          SizedBox(
+            height: 20,
+          ),
+          FutureBuilder(
+            builder: (_, songSnapShot) => songSnapShot.hasData
+                ? ListView.builder(
+                    itemCount: songSnapShot.data.length,
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemBuilder: (_, index) => ListTile(
+                      tileColor: Colors.black38,
+                      leading: CircleAvatar(
+                          backgroundImage: NetworkImage(
+                              'https://images.macrumors.com/t/sqodWOqvWOvq6cU8t2ahMlU4AJM=/1600x0/article-new/2018/05/apple-music-note.jpg')),
+                      title: Text(""),
+                      subtitle: Text(
+                        "",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      trailing: IconButton(
+                        splashColor: Colors.red,
+                        icon: Icon(
+                          Icons.delete,
+                          color: Colors.red,
+                        ),
+                        onPressed: () async {
+                          var _songLists = await Hive.openBox('$playListName');
+                          setState(() {
+                            _songLists.deleteAt(index);
+                          });
+                        },
+                      ),
+                      onTap: () {},
+                    ),
+                  )
+                : Padding(
+                    padding: const EdgeInsets.only(top: 100),
+                    child: Text(
+                      "No favourites for you...?",
+                    ),
+                  ),
+          )
+        ],
       ),
     );
   }

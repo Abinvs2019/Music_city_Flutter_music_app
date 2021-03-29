@@ -1,11 +1,12 @@
-import 'dart:io';
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_app2/Playlist.dart';
-import 'package:flutter_app2/Playlist/playlist.dart';
-import 'package:flutter_app2/hive_helper.dart';
-import 'package:flutter_app2/search.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_app2/Screens/Favourites.dart';
+import 'package:flutter_app2/Playlist/playList.dart';
+import 'package:flutter_app2/model/hive_helper.dart';
+import 'package:flutter_app2/Screens/search.dart';
 import 'package:flutter_audio_query/flutter_audio_query.dart';
 import 'package:flutter_media_notification/flutter_media_notification.dart';
 import 'package:hive/hive.dart';
@@ -34,6 +35,7 @@ class SongsStateagain extends State<SongsAgain>
   final GlobalKey<SongsStateagain> key = GlobalKey<SongsStateagain>();
   final AudioPlayer player = AudioPlayer();
   List<SongInfo> songs = [];
+  TextEditingController _textFieldController = TextEditingController();
   final pi = 3.14;
   bool isPlaying = false;
   double minmumvalue = 0.0, maximumvalue = 0.0, currentvalue = 0.0;
@@ -45,7 +47,7 @@ class SongsStateagain extends State<SongsAgain>
   void initState() {
     _animControl =
         AnimationController(vsync: this, duration: Duration(seconds: 2));
-    isPlaying != null ? _animControl.repeat() : _animControl.repeat();
+    isPlaying != true ? _animControl.repeat() : _animControl.stop();
     super.initState();
     print("Init CurrentINdex $currentIndex");
     getTracks();
@@ -55,34 +57,36 @@ class SongsStateagain extends State<SongsAgain>
 
   void getTracks() async {
     songs = await audioQuery.getSongs();
-    setState(() {
-      songs = songs;
+    setState(
+      () {
+        songs = songs;
 
-      changeState();
-      // setSong(songs[currentIndex]);
+        changeState();
+        // setSong(songs[currentIndex]);
 
-      MediaNotification.setListener('play', () {
-        setState(
-          () => status = changeState(),
-        );
-      });
+        MediaNotification.setListener('play', () {
+          setState(
+            () => status = changeState(),
+          );
+        });
 
-      MediaNotification.setListener('pause', () {
-        setState(
-          () => status = changeState(),
-        );
-      });
+        MediaNotification.setListener('pause', () {
+          setState(
+            () => status = changeState(),
+          );
+        });
 
-      MediaNotification.setListener('next', () {
-        setState(() => status = changeTrack(true));
-      });
+        MediaNotification.setListener('next', () {
+          setState(() => status = changeTrack(true));
+        });
 
-      MediaNotification.setListener('prev', () {
-        setState(() => status = changeTrack(false));
-      });
+        MediaNotification.setListener('prev', () {
+          setState(() => status = changeTrack(false));
+        });
 
-      MediaNotification.setListener('select', () {});
-    });
+        MediaNotification.setListener('select', () {});
+      },
+    );
   }
 
   //////////////////
@@ -134,8 +138,10 @@ class SongsStateagain extends State<SongsAgain>
     });
     if (isPlaying) {
       player.play();
+      _animControl.repeat();
     } else {
       player.pause();
+      _animControl.stop();
     }
   }
 
@@ -170,13 +176,42 @@ class SongsStateagain extends State<SongsAgain>
 
   var savedList;
 
-  Future initiateHive() async {
-    ///Creating a HiveBox to Store data
-    savedList = await Hive.openBox('Musicbox');
-  }
+  // Future initiateHive() async {
+  //   ///Creating a HiveBox to Store data
+  //   savedList = await Hive.openBox('Musicbox');
+  //   print("Box opened");
+  // }
 
   searhSong() async {
     songs = await audioQuery.searchSongs(query: _searchText.text);
+  }
+
+  Timer _timer;
+
+  int _start = 10;
+
+  void startTimer() {
+    const oneSec = const Duration(seconds: 1);
+    _timer = new Timer.periodic(
+      oneSec,
+      (Timer timer) {
+        if (_start == 0) {
+          setState(() {
+            timer.cancel();
+            changeState();
+          });
+        } else {
+          setState(() {
+            _start--;
+          });
+        }
+      },
+    );
+  }
+
+  colorz() {
+    gradient:
+    LinearGradient(colors: [Colors.green, Colors.blue]);
   }
 
   @override
@@ -184,7 +219,30 @@ class SongsStateagain extends State<SongsAgain>
     return Scaffold(
       appBar: AppBar(
           actions: <Widget>[
-            IconButton(icon: Icon(Icons.search), onPressed: () {})
+            IconButton(
+              icon: Icon(
+                Icons.timer,
+                color: Colors.red,
+              ),
+              onPressed: () async {
+                showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                          title: Text('Timer'),
+                          content: TextField(
+                            keyboardType: TextInputType.number,
+                            controller: _textFieldController,
+                            inputFormatters: <TextInputFormatter>[
+                              FilteringTextInputFormatter.digitsOnly
+                            ], // Only numbers can be entered
+
+                            decoration: InputDecoration(
+                                hintText: "Set a timer for you music."),
+                          ),
+                        ));
+                startTimer();
+              },
+            )
           ],
           backgroundColor: Colors.black,
           leading: Icon(Icons.music_note, color: Colors.green),
@@ -200,19 +258,29 @@ class SongsStateagain extends State<SongsAgain>
         children: <Widget>[
           _buildListViewSongs(),
           SlidingUpPanel(
-            padding: EdgeInsets.fromLTRB(0, 0, 0, 10),
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(20.0),
               topRight: Radius.circular(24.0),
               bottomLeft: Radius.circular(24.0),
               bottomRight: Radius.circular(24.0),
             ),
+            backdropColor: Colors.white,
+            boxShadow: [],
+            padding: EdgeInsets.fromLTRB(0, 0, 0, 10),
             minHeight: 100,
             // color: Colors.black,
             maxHeight: 1000,
             margin: const EdgeInsets.all(22.0),
             panel: Container(
-              padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
+              decoration: BoxDecoration(
+                borderRadius: new BorderRadius.only(
+                  topLeft: const Radius.circular(40.0),
+                  topRight: const Radius.circular(40.0),
+                  bottomLeft: const Radius.circular(40.0),
+                  bottomRight: const Radius.circular(40.0),
+                ),
+              ),
+              padding: EdgeInsets.fromLTRB(0, 5, 0, 0),
               child: Column(
                 children: <Widget>[
                   Container(
@@ -253,20 +321,34 @@ class SongsStateagain extends State<SongsAgain>
                               ),
                             ],
                           ),
-                          // color: Colors.amber,
+                          color: colorz(),
                         ),
                         SizedBox(
-                          height: 30,
+                          height: 2,
                           width: 500,
                         ),
                         Container(
                           child: Column(
                             children: [
                               IconButton(
+                                padding: EdgeInsets.fromLTRB(350, 0, 0, 20),
+                                icon: Icon(Icons.shuffle),
+                                color: Colors.green,
+                                onPressed: () {
+                                  songs.shuffle();
+                                  Scaffold.of(context).showSnackBar(
+                                    SnackBar(
+                                      backgroundColor: Colors.white,
+                                      content: Text("Shuffled Your Music"),
+                                    ),
+                                  );
+                                },
+                              ),
+                              IconButton(
                                 padding: EdgeInsets.fromLTRB(350, 0, 0, 0),
                                 icon: Icon(Icons.favorite_border_outlined),
                                 color: Colors.green,
-                                onPressed: () {
+                                onPressed: () async {
                                   // final newMusic = SongPlayList()
                                   //   ..songInfo = songs[currentIndex].id;
                                   // print("object");
@@ -274,7 +356,7 @@ class SongsStateagain extends State<SongsAgain>
                                   // addMusic(newMusic, songs[currentIndex].id);
                                   // savedList.keys
                                   //     .contains(songs[currentIndex].id);
-
+                                  savedList = await Hive.openBox('Musicbox');
                                   var songFav = SongPlayList()
                                     ..songInfo = songs[currentIndex].id;
 
@@ -285,35 +367,47 @@ class SongsStateagain extends State<SongsAgain>
                                   savedList.put(
                                       songs[currentIndex].id, songFav);
 
-                                  print("saved lisysavedList");
+                                  print("saved savedList");
                                 },
                               ),
-                              AnimatedBuilder(
-                                animation: _animControl.view,
-                                builder: (context, child) {
-                                  return Transform.rotate(
-                                    angle: _animControl.value * 3 * pi,
-                                    child: child,
-                                  );
-                                },
-                                child: CircleAvatar(
-                                  backgroundImage: songs[currentIndex]
-                                              .albumArtwork ==
-                                          null
-                                      ? AssetImage(
-                                          'android/assets/images/gramaphoneIm.jpeg')
-                                      : FileImage(File(
-                                          songs[currentIndex].albumArtwork)),
-                                  radius: 150,
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.teal,
+                                  borderRadius: BorderRadius.circular(20),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.grey,
+                                      blurRadius: 10,
+                                      offset: Offset(4, 8), // Shadow position
+                                    ),
+                                  ],
+                                ),
+                                child: AnimatedBuilder(
+                                  animation: _animControl.view,
+                                  builder: (context, child) {
+                                    return Transform.rotate(
+                                      angle: _animControl.value * 3 * pi,
+                                      child: child,
+                                    );
+                                  },
+                                  child: CircleAvatar(
+                                    backgroundImage: songs[currentIndex]
+                                                .albumArtwork ==
+                                            null
+                                        ? AssetImage(
+                                            'android/assets/images/gramaphoneIm.jpeg')
+                                        : FileImage(File(
+                                            songs[currentIndex].albumArtwork)),
+                                    radius: 150,
+                                  ),
                                 ),
                               ),
-                              // ),
                               SizedBox(
                                 height: 100,
                                 width: 100,
                               ),
                               Slider(
-                                inactiveColor: Colors.green,
+                                inactiveColor: Colors.teal,
                                 activeColor: Colors.redAccent,
                                 min: minmumvalue,
                                 max: maximumvalue,
@@ -408,6 +502,7 @@ class SongsStateagain extends State<SongsAgain>
                   ),
                 ],
               ),
+              // color: Colors.pink[900],
             ),
             collapsed: Container(
               child: Padding(
@@ -466,7 +561,7 @@ class SongsStateagain extends State<SongsAgain>
                                 height: 6.5,
                               ),
                               Text(
-                                songs[currentIndex].title.trimRight(),
+                                songs[currentIndex].title,
                                 style: TextStyle(
                                   fontSize: 15,
                                   color: Colors.grey,
@@ -508,6 +603,7 @@ class SongsStateagain extends State<SongsAgain>
           BottomNavigationBarItem(
             icon: GestureDetector(
               onTap: () {
+                changeState();
                 Navigator.push(context,
                     MaterialPageRoute(builder: (context) => Favourites()));
               },
@@ -563,7 +659,7 @@ class SongsStateagain extends State<SongsAgain>
       color: Colors.green,
       scrollDirection: Axis.horizontal,
       isAlwaysShown: true,
-      thickness: 10,
+      thickness: 5,
       controller: _scroll,
       scrollbarFadeDuration: Duration(milliseconds: 500),
       scrollbarTimeToFade:
@@ -591,14 +687,8 @@ class SongsStateagain extends State<SongsAgain>
               Icons.favorite_outline,
               color: Colors.green,
             ),
-            onPressed: () {
-              // print("object");
-              // final newMusic = Hive_helper(songinfo: songs[currentIndex].id);
-              // addMusic(newMusic);
-              // print(newMusic);
-
-              // savedList.keys.contains(widget.songInfo.id);
-
+            onPressed: () async {
+              savedList = await Hive.openBox('Musicbox');
               var songFav = SongPlayList()..songInfo = songs[currentIndex].id;
 
               // print(songs[currentIndex].id);
@@ -606,8 +696,6 @@ class SongsStateagain extends State<SongsAgain>
               print(songs[currentIndex].id);
 
               savedList.put(songs[currentIndex].id, songFav);
-
-              print("saved lisysavedList");
 
               Scaffold.of(context).showSnackBar(
                 SnackBar(
@@ -620,11 +708,9 @@ class SongsStateagain extends State<SongsAgain>
             currentIndex = index;
             print("index $index");
             print("current index $currentIndex");
-            SongsAgain(
-              key: key,
-              songInfo: songs[currentIndex],
-            );
-            print(key);
+            SongsAgain(songInfo: songs[currentIndex], key: key);
+            print(currentIndex);
+
             setSong(
               songs[currentIndex],
             );

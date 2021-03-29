@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_app2/songsagain.dart';
+import 'package:flutter_app2/Screens/songsagain.dart';
 import 'package:flutter_audio_query/flutter_audio_query.dart';
 
 class SearchScreen extends StatefulWidget {
