@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_audio_query/flutter_audio_query.dart';
 import 'package:hive/hive.dart';
-import 'package:vs_scrollbar/vs_scrollbar.dart';
 
 class PlaylistSong extends StatefulWidget {
   @override
@@ -60,9 +58,11 @@ class _PlaylistSongState extends State<PlaylistSong> {
                         ),
                         onPressed: () async {
                           var _songLists = await Hive.openBox('$playListName');
-                          setState(() {
-                            _songLists.deleteAt(index);
-                          });
+                          setState(
+                            () {
+                              _songLists.deleteAt(index);
+                            },
+                          );
                         },
                       ),
                       onTap: () {},

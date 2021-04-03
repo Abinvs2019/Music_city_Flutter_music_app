@@ -1,8 +1,10 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_app2/Playlist/playList.dart';
 import 'package:flutter_app2/Screens/songsagain.dart';
+import 'package:flutter_app2/model/hive_helper.dart';
 import 'package:flutter_audio_query/flutter_audio_query.dart';
+import 'package:hive/hive.dart';
 
 class SearchScreen extends StatefulWidget {
   @override
@@ -14,6 +16,24 @@ class _SearchScreenState extends State<SearchScreen> {
   final FlutterAudioQuery audioQuery = FlutterAudioQuery();
   final TextEditingController _searchText = new TextEditingController();
   List<SongInfo> songs = [];
+  int currentIndex = 0;
+
+  void initState() {
+    super.initState();
+    searhSong();
+    songs = songs;
+  }
+
+  void getTracks() async {
+    songs = await audioQuery.getSongs();
+    setState(() {
+      songs = songs;
+    });
+  }
+
+  searhSong() async {
+    songs = await audioQuery.searchSongs(query: _searchText.text);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +41,11 @@ class _SearchScreenState extends State<SearchScreen> {
       appBar: AppBar(
         title: TextField(
           controller: _searchText,
+          onChanged: (value) {
+            setState(() {
+              searhSong();
+            });
+          },
           decoration: InputDecoration(
               border: InputBorder.none, hintText: 'Enter a search term'),
         ),
@@ -29,19 +54,56 @@ class _SearchScreenState extends State<SearchScreen> {
         ],
       ),
       body: _buildListViewSongs(),
+      bottomNavigationBar: BottomNavigationBar(
+        items: [
+          BottomNavigationBarItem(
+            icon: GestureDetector(onTap: () {
+              Navigator.pop(context,
+                  MaterialPageRoute(builder: (context) => SongsAgain()));
+              Icon(
+                Icons.playlist_play,
+                color: Colors.green,
+              );
+            }),
+            title: Text(
+              'Home',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+          BottomNavigationBarItem(
+            icon: GestureDetector(onTap: () {
+              Navigator.pop(
+                  context, MaterialPageRoute(builder: (context) => Playlist()));
+              child:
+              Icon(
+                Icons.playlist_play,
+                color: Colors.red,
+              );
+            }),
+            title: Text(
+              'Playlist',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+          BottomNavigationBarItem(
+            icon: GestureDetector(
+              onTap: () {},
+              child: Icon(
+                Icons.search,
+                color: Colors.teal,
+              ),
+            ),
+            title: Text(
+              'Search',
+              style: TextStyle(color: Colors.green),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  searhSong() async {
-    songs = await audioQuery.searchSongs(query: _searchText.text);
-  }
-
-  void initState() {
-    super.initState();
-    searhSong();
-    songs = songs;
-  }
-
+  var savedList;
   Widget _buildListViewSongs() {
     return ListView.separated(
       separatorBuilder: (context, index) => Divider(),
@@ -50,33 +112,43 @@ class _SearchScreenState extends State<SearchScreen> {
         leading: CircleAvatar(
           backgroundImage: songs[index].albumArtwork == null
               ? AssetImage('android/assets/images/Apple-Music-artist-promo.jpg')
-              : FileImage(File(songs[index].albumArtwork)),
+              : FileImage(
+                  File(songs[index].albumArtwork),
+                ),
         ),
         title: Text(
           songs[index].title,
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.black),
         ),
         subtitle:
-            Text(songs[index].artist, style: TextStyle(color: Colors.white)),
+            Text(songs[index].artist, style: TextStyle(color: Colors.black)),
         trailing: IconButton(
           icon: Icon(
             Icons.favorite_outline,
             color: Colors.green,
           ),
-          onPressed: () {
-            // print("object");
-            // final newMusic = Hive_helper(songinfo: songs[currentIndex].id);
-            // addMusic(newMusic);
-            // print(newMusic);
+          onPressed: () async {
+            savedList = await Hive.openBox('Musicbox');
+            var songFav = SongPlayList()..songInfo = songs[currentIndex].id;
 
-            // savedList.keys.contains(widget.songInfo.id);
+            // print(songs[currentIndex].id);
+            // print(songFav);
+            print(songs[currentIndex].id);
+
+            savedList.put(songs[currentIndex].id, songFav);
           },
         ),
         onTap: () {
+          print("object");
           int currentIndex = index;
-          SongsAgain(
-            songInfo: songs[currentIndex],
-            key: key,
+          Navigator.push(
+            context,
+            (MaterialPageRoute(
+              builder: (context) => SongsAgain(
+                key: key,
+                songInfo: songs[currentIndex],
+              ),
+            )),
           );
         },
       ),

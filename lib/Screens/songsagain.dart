@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:draggable_scrollbar/draggable_scrollbar.dart';
+import 'package:faker/faker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_app2/Screens/Favourites.dart';
-import 'package:flutter_app2/Playlist/playList.dart';
 import 'package:flutter_app2/model/hive_helper.dart';
 import 'package:flutter_app2/Screens/search.dart';
 import 'package:flutter_audio_query/flutter_audio_query.dart';
@@ -12,16 +12,14 @@ import 'package:flutter_media_notification/flutter_media_notification.dart';
 import 'package:hive/hive.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
-import 'package:vs_scrollbar/vs_scrollbar.dart';
 
 class SongsAgain extends StatefulWidget {
   SongInfo songInfo;
+  Function pausePlayer;
+
   final GlobalKey<SongsStateagain> key;
 
-  SongsAgain({
-    this.songInfo,
-    this.key,
-  }) : super(key: key);
+  SongsAgain({this.songInfo, this.key, this.pausePlayer}) : super(key: key);
 
   @override
   SongsStateagain createState() => SongsStateagain();
@@ -35,7 +33,8 @@ class SongsStateagain extends State<SongsAgain>
   final GlobalKey<SongsStateagain> key = GlobalKey<SongsStateagain>();
   final AudioPlayer player = AudioPlayer();
   List<SongInfo> songs = [];
-  TextEditingController _textFieldController = TextEditingController();
+  List<String> usersList = [];
+
   final pi = 3.14;
   bool isPlaying = false;
   double minmumvalue = 0.0, maximumvalue = 0.0, currentvalue = 0.0;
@@ -43,16 +42,45 @@ class SongsStateagain extends State<SongsAgain>
   int currentIndex = 0;
   String status = 'hidden';
   AnimationController _animControl;
+  int _currentindex = 0;
+
+  Icon playli = Icon(
+    Icons.favorite,
+    color: Colors.green,
+  );
+  Icon shuffle = Icon(
+    Icons.shuffle,
+    color: Colors.green,
+  );
+  int shuffleiconnum = 0;
+  int playlistIconNum = 0;
 
   void initState() {
+    print(songs);
     _animControl =
         AnimationController(vsync: this, duration: Duration(seconds: 2));
     isPlaying != true ? _animControl.repeat() : _animControl.stop();
     super.initState();
-    print("Init CurrentINdex $currentIndex");
+
     getTracks();
-    print("got track");
+
     changeState();
+
+    getNames();
+  }
+
+  getNames() {
+    for (int i = 0; i < songs.length; i++) {
+      usersList.add(songs.toString());
+      print(usersList);
+    }
+// faker.person.name() ////avoid theuserlistandaddSongsLISTto use//////
+    //sort the list
+    usersList.sort(
+      (a, b) {
+        return a.toLowerCase().compareTo(b.toLowerCase());
+      },
+    );
   }
 
   void getTracks() async {
@@ -66,13 +94,13 @@ class SongsStateagain extends State<SongsAgain>
 
         MediaNotification.setListener('play', () {
           setState(
-            () => status = changeState(),
+            () => status = playPlayer(),
           );
         });
 
         MediaNotification.setListener('pause', () {
           setState(
-            () => status = changeState(),
+            () => status = pausePlayer(),
           );
         });
 
@@ -89,7 +117,7 @@ class SongsStateagain extends State<SongsAgain>
     );
   }
 
-  //////////////////
+  //////////////////////
   void setSong(SongInfo songInfo) async {
     print("Got song info");
     songInfo = songInfo;
@@ -145,12 +173,23 @@ class SongsStateagain extends State<SongsAgain>
     }
   }
 
+  pausePlayer() {
+    player.pause();
+    _animControl.stop();
+  }
+
+  playPlayer() {
+    player.play();
+    _animControl.repeat();
+  }
+
   changeTrack(bool isNext) {
     print("ChangeTrackCalled");
     if (isNext) {
       print("ChangeTrack CurrentIndex $currentIndex");
       if (currentIndex != songs.length - 1) {
         currentIndex++;
+
         print("IndexValueDecrimented");
       }
     } else {
@@ -163,6 +202,17 @@ class SongsStateagain extends State<SongsAgain>
     print("SetSongCurrentIndex $currentIndex");
   }
 
+  final tabs = [
+    SafeArea(
+      child: SongsAgain(),
+    ),
+    SafeArea(
+      child: Favourites(),
+    ),
+    SafeArea(
+      child: SearchScreen(),
+    ),
+  ];
   void dispose() {
     super.dispose();
     player?.dispose();
@@ -187,19 +237,20 @@ class SongsStateagain extends State<SongsAgain>
   }
 
   Timer _timer;
-
-  int _start = 10;
-
-  void startTimer() {
+  int _start;
+  void startTimer(int _start) {
+    _start = _start;
     const oneSec = const Duration(seconds: 1);
     _timer = new Timer.periodic(
       oneSec,
       (Timer timer) {
         if (_start == 0) {
-          setState(() {
-            timer.cancel();
-            changeState();
-          });
+          setState(
+            () {
+              timer.cancel();
+              pausePlayer();
+            },
+          );
         } else {
           setState(() {
             _start--;
@@ -209,11 +260,24 @@ class SongsStateagain extends State<SongsAgain>
     );
   }
 
-  colorz() {
-    gradient:
-    LinearGradient(colors: [Colors.green, Colors.blue]);
+  stopTimer() {
+    setState(() {
+      _timer.cancel();
+    });
   }
 
+  timerOnTrackfinish() {
+    setState(
+      () {
+        currentTime = getDuration(currentvalue);
+        if (currentvalue >= maximumvalue) {
+          return pausePlayer();
+        }
+      },
+    );
+  }
+
+  final color = const Color(0xff284756);
   @override
   Widget build(context) {
     return Scaffold(
@@ -224,371 +288,559 @@ class SongsStateagain extends State<SongsAgain>
                 Icons.timer,
                 color: Colors.red,
               ),
-              onPressed: () async {
+              onPressed: () {
                 showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                          title: Text('Timer'),
-                          content: TextField(
-                            keyboardType: TextInputType.number,
-                            controller: _textFieldController,
-                            inputFormatters: <TextInputFormatter>[
-                              FilteringTextInputFormatter.digitsOnly
-                            ], // Only numbers can be entered
-
-                            decoration: InputDecoration(
-                                hintText: "Set a timer for you music."),
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    backgroundColor: Colors.black,
+                    insetPadding: EdgeInsets.fromLTRB(0, 450, 0, 0),
+                    actions: <Widget>[],
+                    title: Center(
+                      child: Text(
+                        "Set Timer",
+                        style: TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey[400]),
+                      ),
+                    ),
+                    content: Container(
+                      height: 185,
+                      child: Column(
+                        children: [
+                          GestureDetector(
+                            child: Container(
+                              child: Text(
+                                "10 Second",
+                                style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey[400]),
+                              ),
+                            ),
+                            onTap: () {
+                              startTimer(10);
+                              // Scaffold.of(context).showSnackBar(
+                              //   SnackBar(
+                              //     content: Text("Timer Set to 10 Seconds"),
+                              //   ),
+                              // );
+                              Navigator.pop(context);
+                            },
                           ),
-                        ));
-                startTimer();
+                          SizedBox(
+                            height: 13,
+                          ),
+                          GestureDetector(
+                            child: Text(
+                              "10 Minutes",
+                              style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey[400]),
+                            ),
+                            onTap: () {
+                              startTimer(600);
+                              // Scaffold.of(context).showSnackBar(
+                              //   SnackBar(
+                              //     content: Text("TImer Set To 10 minutes"),
+                              //   ),
+                              // );
+                              Navigator.pop(context);
+                            },
+                          ),
+                          SizedBox(
+                            height: 13,
+                          ),
+                          GestureDetector(
+                            child: Text(
+                              "30 Minutes",
+                              style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey[400]),
+                            ),
+                            onTap: () {
+                              startTimer(1800);
+                              // Scaffold.of(context).showSnackBar(
+                              //   SnackBar(
+                              //     content: Text("TImer Set to 30 Minutes"),
+                              //   ),
+                              // );
+                              Navigator.pop(context);
+                            },
+                          ),
+                          SizedBox(
+                            height: 13,
+                          ),
+                          GestureDetector(
+                            child: Text(
+                              "60 Minutes",
+                              style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey[400]),
+                            ),
+                            onTap: () {
+                              startTimer(3600);
+                              // Scaffold.of(context).showSnackBar(
+                              //   SnackBar(
+                              //     content: Text("Timer Set to 60 Minutes"),
+                              //   ),
+                              // );
+                              Navigator.pop(context);
+                            },
+                          ),
+                          SizedBox(
+                            height: 13,
+                          ),
+                          GestureDetector(
+                            child: Text(
+                              "End Of the Track",
+                              style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey[400]),
+                            ),
+                            onTap: () {
+                              timerOnTrackfinish();
+                              // Scaffold.of(context).showSnackBar(
+                              //   SnackBar(
+                              //     content:
+                              //         Text("Timer Set to End Of the track"),
+                              //   ),
+                              // );
+                              Navigator.pop(context);
+                            },
+                          ),
+                          SizedBox(
+                            height: 13,
+                          ),
+                          GestureDetector(
+                            child: Text(
+                              "Off Timer",
+                              style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey[400]),
+                            ),
+                            onTap: () {
+                              stopTimer();
+                              // Scaffold.of(context).showSnackBar(
+                              //   SnackBar(
+                              //     content: Text("Timer OFF"),
+                              //   ),
+                              // );
+                              Navigator.pop(context);
+                            },
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                );
               },
             )
           ],
           backgroundColor: Colors.black,
           leading: Icon(Icons.music_note, color: Colors.green),
           title: Text(
-            'Music City',
+            'musizcity.',
             style: TextStyle(
-              color: Colors.green,
+              color: Colors.red,
               fontSize: 40,
             ),
           ),
           centerTitle: true),
-      body: Stack(
-        children: <Widget>[
-          _buildListViewSongs(),
-          SlidingUpPanel(
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(20.0),
-              topRight: Radius.circular(24.0),
-              bottomLeft: Radius.circular(24.0),
-              bottomRight: Radius.circular(24.0),
-            ),
-            backdropColor: Colors.white,
-            boxShadow: [],
-            padding: EdgeInsets.fromLTRB(0, 0, 0, 10),
-            minHeight: 100,
-            // color: Colors.black,
-            maxHeight: 1000,
-            margin: const EdgeInsets.all(22.0),
-            panel: Container(
-              decoration: BoxDecoration(
-                borderRadius: new BorderRadius.only(
-                  topLeft: const Radius.circular(40.0),
-                  topRight: const Radius.circular(40.0),
-                  bottomLeft: const Radius.circular(40.0),
-                  bottomRight: const Radius.circular(40.0),
-                ),
+      body: SafeArea(
+        child: Stack(
+          children: <Widget>[
+            _buildListViewSongs(),
+            SlidingUpPanel(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20.0),
+                topRight: Radius.circular(24.0),
+                bottomLeft: Radius.circular(24.0),
+                bottomRight: Radius.circular(24.0),
               ),
-              padding: EdgeInsets.fromLTRB(0, 5, 0, 0),
-              child: Column(
-                children: <Widget>[
-                  Container(
-                    padding: EdgeInsets.fromLTRB(0, 70, 0, 0),
-                    child: Column(
-                      children: <Widget>[
-                        Container(
-                          child: Column(
-                            children: [
-                              Container(
-                                height: 60,
-                                width: 350,
-                                padding: EdgeInsets.fromLTRB(5, 10, 5, 5),
-                                margin: EdgeInsets.fromLTRB(30, 10, 0, 0),
-                                child: Center(
-                                  child: Text(
-                                    songs[currentIndex].title,
-                                    style: TextStyle(
-                                        color: Colors.green,
-                                        fontSize: 16.0,
-                                        fontWeight: FontWeight.bold),
+              backdropColor: color,
+              boxShadow: [],
+              padding: EdgeInsets.fromLTRB(0, 0, 0, 10),
+              minHeight: 100,
+              // color: Colors.black,
+              maxHeight: 1000,
+              margin: const EdgeInsets.all(20.0),
+              panel: Container(
+                decoration: BoxDecoration(
+                  borderRadius: new BorderRadius.only(
+                    topLeft: const Radius.circular(40.0),
+                    topRight: const Radius.circular(40.0),
+                    bottomLeft: const Radius.circular(40.0),
+                    bottomRight: const Radius.circular(40.0),
+                  ),
+                ),
+
+                child: Column(
+                  children: <Widget>[
+                    Container(
+                      padding: EdgeInsets.fromLTRB(0, 60, 0, 0),
+                      child: Column(
+                        children: <Widget>[
+                          Container(
+                            child: Column(
+                              children: [
+                                Container(
+                                  height: 60,
+                                  width: 350,
+                                  padding: EdgeInsets.fromLTRB(5, 10, 5, 5),
+                                  margin: EdgeInsets.fromLTRB(30, 10, 0, 0),
+                                  child: Center(
+                                    child: Text(
+                                      songs[currentIndex].title,
+                                      style: TextStyle(
+                                          color: Colors.green,
+                                          fontSize: 16.0,
+                                          fontWeight: FontWeight.bold),
+                                    ),
                                   ),
                                 ),
-                              ),
-                              Container(
-                                height: 50,
-                                width: 200,
-                                margin: EdgeInsets.fromLTRB(0, 0, 0, 15),
-                                child: Center(
-                                  child: Text(
-                                    songs[currentIndex].artist,
-                                    style: TextStyle(
-                                        color: Colors.green,
-                                        fontSize: 12.0,
-                                        fontWeight: FontWeight.bold),
+                                Container(
+                                  height: 50,
+                                  width: 200,
+                                  margin: EdgeInsets.fromLTRB(0, 0, 0, 15),
+                                  child: Center(
+                                    child: Text(
+                                      songs[currentIndex].artist,
+                                      style: TextStyle(
+                                          color: Colors.green,
+                                          fontSize: 12.0,
+                                          fontWeight: FontWeight.bold),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                          color: colorz(),
-                        ),
-                        SizedBox(
-                          height: 2,
-                          width: 500,
-                        ),
-                        Container(
-                          child: Column(
-                            children: [
-                              IconButton(
-                                padding: EdgeInsets.fromLTRB(350, 0, 0, 20),
-                                icon: Icon(Icons.shuffle),
-                                color: Colors.green,
-                                onPressed: () {
-                                  songs.shuffle();
-                                  Scaffold.of(context).showSnackBar(
-                                    SnackBar(
-                                      backgroundColor: Colors.white,
-                                      content: Text("Shuffled Your Music"),
-                                    ),
-                                  );
-                                },
-                              ),
-                              IconButton(
-                                padding: EdgeInsets.fromLTRB(350, 0, 0, 0),
-                                icon: Icon(Icons.favorite_border_outlined),
-                                color: Colors.green,
-                                onPressed: () async {
-                                  // final newMusic = SongPlayList()
-                                  //   ..songInfo = songs[currentIndex].id;
-                                  // print("object");
-                                  // print(newMusic);
-                                  // addMusic(newMusic, songs[currentIndex].id);
-                                  // savedList.keys
-                                  //     .contains(songs[currentIndex].id);
-                                  savedList = await Hive.openBox('Musicbox');
-                                  var songFav = SongPlayList()
-                                    ..songInfo = songs[currentIndex].id;
-
-                                  // print(songs[currentIndex].id);
-                                  // print(songFav);
-                                  print(songs[currentIndex].id);
-
-                                  savedList.put(
-                                      songs[currentIndex].id, songFav);
-
-                                  print("saved savedList");
-                                },
-                              ),
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.teal,
-                                  borderRadius: BorderRadius.circular(20),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey,
-                                      blurRadius: 10,
-                                      offset: Offset(4, 8), // Shadow position
-                                    ),
-                                  ],
-                                ),
-                                child: AnimatedBuilder(
-                                  animation: _animControl.view,
-                                  builder: (context, child) {
-                                    return Transform.rotate(
-                                      angle: _animControl.value * 3 * pi,
-                                      child: child,
+                          SizedBox(
+                            height: 2,
+                            width: 500,
+                          ),
+                          Container(
+                            child: Column(
+                              children: [
+                                IconButton(
+                                  padding: EdgeInsets.fromLTRB(350, 0, 0, 20),
+                                  icon: shuffle,
+                                  color: Colors.green,
+                                  onPressed: () {
+                                    setState(
+                                      () {
+                                        if (shuffleiconnum == 0) {
+                                          shuffle = Icon(
+                                            Icons.done_sharp,
+                                            color: Colors.green,
+                                          );
+                                          shuffleiconnum = 1;
+                                        } else {
+                                          shuffle = Icon(
+                                            Icons.shuffle,
+                                            color: Colors.green,
+                                          );
+                                          shuffleiconnum = 0;
+                                        }
+                                      },
+                                    );
+                                    songs.shuffle();
+                                    Scaffold.of(context).showSnackBar(
+                                      SnackBar(
+                                        backgroundColor: Colors.white,
+                                        content: Text("Shuffled Your Music"),
+                                      ),
                                     );
                                   },
-                                  child: CircleAvatar(
-                                    backgroundImage: songs[currentIndex]
-                                                .albumArtwork ==
-                                            null
-                                        ? AssetImage(
-                                            'android/assets/images/gramaphoneIm.jpeg')
-                                        : FileImage(File(
-                                            songs[currentIndex].albumArtwork)),
-                                    radius: 150,
+                                ),
+                                IconButton(
+                                  padding: EdgeInsets.fromLTRB(350, 0, 0, 0),
+                                  icon: playli,
+                                  color: Colors.green,
+                                  onPressed: () async {
+                                    setState(
+                                      () {
+                                        if (playlistIconNum == 0) {
+                                          playli = Icon(
+                                            Icons.favorite,
+                                            color: Colors.green,
+                                          );
+                                          playlistIconNum = 1;
+                                        } else {
+                                          playli = Icon(
+                                            Icons.favorite_border,
+                                            color: Colors.green,
+                                          );
+                                          playlistIconNum = 0;
+                                        }
+                                      },
+                                    );
+                                    // final newMusic = SongPlayList()
+                                    //   ..songInfo = songs[currentIndex].id;
+                                    // print("object");
+                                    // print(newMusic);
+                                    // addMusic(newMusic, songs[currentIndex].id);
+                                    // savedList.keys
+                                    //     .contains(songs[currentIndex].id);
+                                    savedList = await Hive.openBox('Musicbox');
+                                    var songFav = SongPlayList()
+                                      ..songInfo = songs[currentIndex].id;
+
+                                    // print(songs[currentIndex].id);
+                                    // print(songFav);
+                                    print(songs[currentIndex].id);
+
+                                    savedList.put(
+                                        songs[currentIndex].id, songFav);
+
+                                    print("saved savedList");
+                                  },
+                                ),
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.teal,
+                                    borderRadius: BorderRadius.circular(20),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey,
+                                        blurRadius: 10,
+                                        offset: Offset(4, 8), // Shadow position
+                                      ),
+                                    ],
+                                  ),
+                                  child: AnimatedBuilder(
+                                    animation: _animControl.view,
+                                    builder: (context, child) {
+                                      return Transform.rotate(
+                                        angle: _animControl.value * 3 * pi,
+                                        child: child,
+                                      );
+                                    },
+                                    child: CircleAvatar(
+                                      backgroundImage: songs[currentIndex]
+                                                  .albumArtwork ==
+                                              null
+                                          ? AssetImage(
+                                              'android/assets/images/gramaphoneIm.jpeg')
+                                          : FileImage(File(songs[currentIndex]
+                                              .albumArtwork)),
+                                      radius: 150,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              SizedBox(
-                                height: 100,
-                                width: 100,
-                              ),
-                              Slider(
-                                inactiveColor: Colors.teal,
-                                activeColor: Colors.redAccent,
-                                min: minmumvalue,
-                                max: maximumvalue,
-                                value: currentvalue,
-                                onChanged: (value) {
-                                  currentvalue = value;
+                                SizedBox(
+                                  height: 100,
+                                  width: 100,
+                                ),
+                                Slider(
+                                  inactiveColor: Colors.teal,
+                                  activeColor: Colors.redAccent,
+                                  min: minmumvalue,
+                                  max: maximumvalue,
+                                  value: currentvalue,
+                                  onChanged: (value) {
+                                    currentvalue = value;
 
-                                  player.seek(
-                                    Duration(
-                                      milliseconds: currentvalue.round(),
-                                    ),
-                                  );
-                                  if (currentvalue >= maximumvalue) {
-                                    changeTrack(true);
-                                  }
-                                },
-                              ),
-                              Container(
-                                transform: Matrix4.translationValues(0, -5, 0),
-                                margin: EdgeInsets.fromLTRB(5, 0, 5, 15),
-                                child: Row(
-                                  children: [
-                                    SizedBox(
-                                      width: 20,
-                                    ),
-                                    Text(
-                                      currentTime,
-                                      style: TextStyle(
-                                          color: Colors.green,
-                                          fontSize: 12.0,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    SizedBox(
-                                      width: 342,
-                                    ),
-                                    Text(
-                                      endTime,
-                                      style: TextStyle(
-                                          color: Colors.green,
-                                          fontSize: 12.0,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    SizedBox(
-                                      width: 20,
-                                    ),
-                                  ],
+                                    player.seek(
+                                      Duration(
+                                        milliseconds: currentvalue.round(),
+                                      ),
+                                    );
+                                    if (currentvalue >= maximumvalue) {
+                                      changeTrack(true);
+                                    }
+                                  },
                                 ),
-                              ),
-                              Container(
-                                margin: EdgeInsets.fromLTRB(60, 0, 60, 0),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    GestureDetector(
-                                      child: Icon(Icons.skip_previous_outlined,
-                                          color: Colors.green, size: 55),
-                                      behavior: HitTestBehavior.translucent,
-                                      onTap: () {
-                                        changeTrack(false);
-                                      },
-                                    ),
-                                    GestureDetector(
-                                      child: Icon(
-                                          isPlaying
-                                              ? Icons
-                                                  .pause_circle_filled_rounded
-                                              : Icons.play_circle_fill_rounded,
-                                          color: Colors.red,
-                                          size: 85),
-                                      behavior: HitTestBehavior.translucent,
-                                      onTap: () {
-                                        changeState();
-                                      },
-                                    ),
-                                    GestureDetector(
-                                      child: Icon(Icons.skip_next_outlined,
-                                          color: Colors.green, size: 55),
-                                      behavior: HitTestBehavior.translucent,
-                                      onTap: () {
-                                        changeTrack(true);
-                                      },
-                                    ),
-                                  ],
+                                Container(
+                                  transform:
+                                      Matrix4.translationValues(0, -5, 0),
+                                  margin: EdgeInsets.fromLTRB(5, 0, 5, 15),
+                                  child: Row(
+                                    children: [
+                                      SizedBox(
+                                        width: 20,
+                                      ),
+                                      Text(
+                                        currentTime,
+                                        style: TextStyle(
+                                            color: Colors.green,
+                                            fontSize: 12.0,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      SizedBox(
+                                        width: 342,
+                                      ),
+                                      Text(
+                                        endTime,
+                                        style: TextStyle(
+                                            color: Colors.green,
+                                            fontSize: 12.0,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      SizedBox(
+                                        width: 20,
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
+                                Container(
+                                  margin: EdgeInsets.fromLTRB(60, 0, 60, 0),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      GestureDetector(
+                                        child: Icon(
+                                            Icons.skip_previous_outlined,
+                                            color: Colors.green,
+                                            size: 55),
+                                        behavior: HitTestBehavior.translucent,
+                                        onTap: () {
+                                          changeTrack(false);
+                                        },
+                                      ),
+                                      GestureDetector(
+                                        child: Icon(
+                                            isPlaying
+                                                ? Icons
+                                                    .pause_circle_filled_rounded
+                                                : Icons
+                                                    .play_circle_fill_rounded,
+                                            color: Colors.red,
+                                            size: 85),
+                                        behavior: HitTestBehavior.translucent,
+                                        onTap: () {
+                                          changeState();
+                                        },
+                                      ),
+                                      GestureDetector(
+                                        child: Icon(Icons.skip_next_outlined,
+                                            color: Colors.green, size: 55),
+                                        behavior: HitTestBehavior.translucent,
+                                        onTap: () {
+                                          changeTrack(true);
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              // color: Colors.pink[900],
-            ),
-            collapsed: Container(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(0, 15, 0, 18),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          child: Row(
-                            children: [
-                              IconButton(
-                                icon: Icon(
-                                  Icons.skip_previous_outlined,
-                                  size: 50,
-                                ),
-                                onPressed: () {
-                                  changeTrack(true);
-                                  print("ChangeTrackTrueCalled");
-                                },
-                              ),
-                              IconButton(
-                                icon: Icon(
-                                    isPlaying
-                                        ? Icons.pause_circle_filled_rounded
-                                        : Icons.play_circle_fill_rounded,
-                                    color: Colors.red,
-                                    size: 50),
-                                onPressed: () {
-                                  changeState();
-                                },
-                              ),
-                              IconButton(
-                                icon: Icon(
-                                  Icons.skip_next_outlined,
-                                  size: 50,
-                                ),
-                                onPressed: () {
-                                  changeTrack(false);
-                                  print("ChangeTrackFalseCalled");
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          width: 5,
-                          height: 5,
-                        ),
-                        Container(
-                          width: 250,
-                          child: Column(
-                            children: [
-                              SizedBox(
-                                width: 6.5,
-                                height: 6.5,
-                              ),
-                              Text(
-                                songs[currentIndex].title,
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                              Text(
-                                songs[currentIndex].artist,
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Icon(Icons.arrow_upward),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),
+                // color: Colors.pink[900],
               ),
-            ),
-          )
-        ],
+              collapsed: Container(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(0, 15, 0, 18),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            child: Row(
+                              children: [
+                                IconButton(
+                                  icon: Icon(
+                                    Icons.skip_previous_outlined,
+                                    size: 50,
+                                  ),
+                                  onPressed: () {
+                                    changeTrack(true);
+                                    print("ChangeTrackTrueCalled");
+                                  },
+                                ),
+                                IconButton(
+                                  icon: Icon(
+                                      isPlaying
+                                          ? Icons.pause_circle_filled_rounded
+                                          : Icons.play_circle_fill_rounded,
+                                      color: Colors.red,
+                                      size: 50),
+                                  onPressed: () {
+                                    changeState();
+                                  },
+                                ),
+                                IconButton(
+                                  icon: Icon(
+                                    Icons.skip_next_outlined,
+                                    size: 50,
+                                  ),
+                                  onPressed: () {
+                                    changeTrack(false);
+                                    print("ChangeTrackFalseCalled");
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(
+                            width: 4,
+                            height: 4,
+                          ),
+                          Container(
+                            width: 250,
+                            child: Column(
+                              children: [
+                                SizedBox(
+                                  width: 6.5,
+                                  height: 6.5,
+                                ),
+                                Text(
+                                  songs[currentIndex].title,
+                                  style: TextStyle(
+                                    fontFamily: 'DancingScript',
+                                    fontSize: 15,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                                Text(
+                                  songs[currentIndex].artist,
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Transform.rotate(
+                            angle: 270 * pi / 180,
+                            child: IconButton(
+                              icon: Icon(
+                                Icons.double_arrow_sharp,
+                                color: Colors.grey,
+                              ),
+                              onPressed: () {
+                                Scaffold.of(context).showSnackBar(SnackBar(
+                                  content: Text("Slide Up"),
+                                ));
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            )
+          ],
+        ),
       ),
       backgroundColor: Colors.black,
       bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentindex,
         items: [
           BottomNavigationBarItem(
             icon: new Icon(
@@ -603,17 +855,20 @@ class SongsStateagain extends State<SongsAgain>
           BottomNavigationBarItem(
             icon: GestureDetector(
               onTap: () {
-                changeState();
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => Favourites()));
+                Navigator.push(
+                    context,
+                    (MaterialPageRoute(
+                        builder: (context) => Favourites(
+                              pausePlayer: pausePlayer,
+                            ))));
               },
               child: Icon(
-                Icons.favorite,
+                Icons.playlist_play,
                 color: Colors.green,
               ),
             ),
             title: Text(
-              'favorite',
+              'Playlist',
               style: TextStyle(color: Colors.green),
             ),
           ),
@@ -633,88 +888,81 @@ class SongsStateagain extends State<SongsAgain>
               style: TextStyle(color: Colors.green),
             ),
           ),
-          BottomNavigationBarItem(
-            icon: GestureDetector(
-              onTap: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => PlaylistO()));
-              },
-              child: Icon(
-                Icons.playlist_play,
-                color: Colors.green,
-              ),
-            ),
-            title: Text(
-              'favorite',
-              style: TextStyle(color: Colors.green),
-            ),
-          ),
         ],
+        onTap: (index) {
+          setState(() {
+            _currentindex = index;
+          });
+        },
       ),
     );
   }
 
   Widget _buildListViewSongs() {
-    return VsScrollbar(
-      color: Colors.green,
-      scrollDirection: Axis.horizontal,
-      isAlwaysShown: true,
-      thickness: 5,
-      controller: _scroll,
-      scrollbarFadeDuration: Duration(milliseconds: 500),
-      scrollbarTimeToFade:
-          Duration(milliseconds: 800), // default : Duration(milliseconds: 600)
-
-      child: ListView.separated(
+    return Scrollbar(
+      child: DraggableScrollbar.semicircle(
+        labelTextBuilder: (offset) {
+          final int currentItem = offset ~/ 100;
+          var letter = currentItem <= usersList.length - 1
+              ? usersList[currentItem].substring(0, 1)
+              : usersList.last.substring(0, 1);
+          return Text("$letter");
+        },
         controller: _scroll,
-        separatorBuilder: (context, index) => Divider(),
-        itemCount: songs.length,
-        itemBuilder: (context, index) => ListTile(
-          leading: CircleAvatar(
-            backgroundImage: songs[index].albumArtwork == null
-                ? AssetImage(
-                    'android/assets/images/Apple-Music-artist-promo.jpg')
-                : FileImage(File(songs[index].albumArtwork)),
-          ),
-          title: Text(
-            songs[index].title,
-            style: TextStyle(color: Colors.white),
-          ),
-          subtitle:
-              Text(songs[index].artist, style: TextStyle(color: Colors.white)),
-          trailing: IconButton(
-            icon: Icon(
-              Icons.favorite_outline,
-              color: Colors.green,
+        child: ListView.separated(
+          controller: _scroll,
+          separatorBuilder: (context, index) => Divider(),
+          itemCount: songs.length,
+          itemBuilder: (context, index) => ListTile(
+            leading: CircleAvatar(
+              backgroundImage: songs[index].albumArtwork == null
+                  ? AssetImage(
+                      'android/assets/images/Apple-Music-artist-promo.jpg')
+                  : FileImage(
+                      File(songs[index].albumArtwork),
+                    ),
             ),
-            onPressed: () async {
-              savedList = await Hive.openBox('Musicbox');
-              var songFav = SongPlayList()..songInfo = songs[currentIndex].id;
+            title: Text(
+              songs[index].title,
+              style: TextStyle(color: Colors.white),
+            ),
+            subtitle: Text(songs[index].artist,
+                style: TextStyle(color: Colors.white)),
+            trailing: IconButton(
+              icon: Icon(
+                Icons.favorite_outline,
+                color: Colors.green,
+              ),
+              onPressed: () async {
+                savedList = await Hive.openBox('Musicbox');
+                var songFav = SongPlayList()..songInfo = songs[currentIndex].id;
 
-              // print(songs[currentIndex].id);
-              // print(songFav);
-              print(songs[currentIndex].id);
+                // print(songs[currentIndex].id);
+                // print(songFav);
+                print(songs[currentIndex].id);
 
-              savedList.put(songs[currentIndex].id, songFav);
+                savedList.put(songs[currentIndex].id, songFav);
 
-              Scaffold.of(context).showSnackBar(
-                SnackBar(
-                  content: Text("Added to Favorite"),
-                ),
+                Scaffold.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text("Added to Favorite"),
+                  ),
+                );
+              },
+            ),
+            onTap: () {
+              widget.pausePlayer();
+              currentIndex = index;
+              print("index $index");
+              print("current index $currentIndex");
+              SongsAgain(songInfo: songs[currentIndex], key: key);
+              print(currentIndex);
+
+              setSong(
+                songs[currentIndex],
               );
             },
           ),
-          onTap: () {
-            currentIndex = index;
-            print("index $index");
-            print("current index $currentIndex");
-            SongsAgain(songInfo: songs[currentIndex], key: key);
-            print(currentIndex);
-
-            setSong(
-              songs[currentIndex],
-            );
-          },
         ),
       ),
     );

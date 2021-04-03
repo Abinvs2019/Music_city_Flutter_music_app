@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 
 class Playlist extends StatefulWidget {
@@ -10,10 +9,11 @@ class Playlist extends StatefulWidget {
 class _PlaylistState extends State<Playlist> {
   TextEditingController _textFieldController = TextEditingController();
   void addPlayListName() {
-    final playListBox = Hive.box("$_textFieldController.text");
-    playListBox.add(_textFieldController.text);
+    final playListName = Hive.box("$_textFieldController.text");
+    playListName.add("");
   }
 
+  List playlistNmaes;
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +21,7 @@ class MusicPlayerState extends State<MusicPlayer> {
   String currentTime = '', endTime = '';
   final AudioPlayer player = AudioPlayer();
   bool isPlaying = false;
+
   void initState() {
     super.initState();
     setSong(widget.songInfo);
