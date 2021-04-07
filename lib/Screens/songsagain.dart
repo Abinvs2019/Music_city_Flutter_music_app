@@ -8,6 +8,7 @@ import 'package:flutter_app2/Screens/Favourites.dart';
 import 'package:flutter_app2/model/hive_helper.dart';
 import 'package:flutter_app2/Screens/search.dart';
 import 'package:flutter_audio_query/flutter_audio_query.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_media_notification/flutter_media_notification.dart';
 import 'package:hive/hive.dart';
 import 'package:just_audio/just_audio.dart';
@@ -42,17 +43,14 @@ class SongsStateagain extends State<SongsAgain>
   int currentIndex = 0;
   String status = 'hidden';
   AnimationController _animControl;
+
   int _currentindex = 0;
 
-  Icon playli = Icon(
-    Icons.favorite,
-    color: Colors.green,
-  );
-  Icon shuffle = Icon(
-    Icons.shuffle,
-    color: Colors.green,
-  );
+  Icon playli = Icon(Icons.favorite, color: Colors.teal[200]);
+  Icon shuffle = Icon(Icons.shuffle, color: Colors.teal[200]);
+
   int shuffleiconnum = 0;
+
   int playlistIconNum = 0;
 
   void initState() {
@@ -213,6 +211,7 @@ class SongsStateagain extends State<SongsAgain>
       child: SearchScreen(),
     ),
   ];
+
   void dispose() {
     super.dispose();
     player?.dispose();
@@ -236,6 +235,7 @@ class SongsStateagain extends State<SongsAgain>
     songs = await audioQuery.searchSongs(query: _searchText.text);
   }
 
+  int _selectedIndex = 0;
   Timer _timer;
   int _start;
   void startTimer(int _start) {
@@ -278,6 +278,13 @@ class SongsStateagain extends State<SongsAgain>
   }
 
   final color = const Color(0xff284756);
+
+  List<Widget> _widgetOptions = <Widget>[
+    SongsAgain(),
+    Favourites(),
+    SearchScreen(),
+  ];
+
   @override
   Widget build(context) {
     return Scaffold(
@@ -442,7 +449,7 @@ class SongsStateagain extends State<SongsAgain>
               },
             )
           ],
-          backgroundColor: Colors.black,
+          backgroundColor: color,
           leading: Icon(Icons.music_note, color: Colors.green),
           title: Text(
             'musizcity.',
@@ -457,13 +464,17 @@ class SongsStateagain extends State<SongsAgain>
           children: <Widget>[
             _buildListViewSongs(),
             SlidingUpPanel(
+              border: Border.all(
+                color: Colors.teal[200],
+                width: 2,
+              ),
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(20.0),
                 topRight: Radius.circular(24.0),
                 bottomLeft: Radius.circular(24.0),
                 bottomRight: Radius.circular(24.0),
               ),
-              backdropColor: color,
+              backdropColor: Colors.grey, color: color,
               boxShadow: [],
               padding: EdgeInsets.fromLTRB(0, 0, 0, 10),
               minHeight: 100,
@@ -498,7 +509,7 @@ class SongsStateagain extends State<SongsAgain>
                                     child: Text(
                                       songs[currentIndex].title,
                                       style: TextStyle(
-                                          color: Colors.green,
+                                          color: Colors.teal[200],
                                           fontSize: 16.0,
                                           fontWeight: FontWeight.bold),
                                     ),
@@ -512,7 +523,7 @@ class SongsStateagain extends State<SongsAgain>
                                     child: Text(
                                       songs[currentIndex].artist,
                                       style: TextStyle(
-                                          color: Colors.green,
+                                          color: Colors.teal[200],
                                           fontSize: 12.0,
                                           fontWeight: FontWeight.bold),
                                     ),
@@ -531,20 +542,20 @@ class SongsStateagain extends State<SongsAgain>
                                 IconButton(
                                   padding: EdgeInsets.fromLTRB(350, 0, 0, 20),
                                   icon: shuffle,
-                                  color: Colors.green,
+                                  color: Colors.teal[200],
                                   onPressed: () {
                                     setState(
                                       () {
                                         if (shuffleiconnum == 0) {
                                           shuffle = Icon(
                                             Icons.done_sharp,
-                                            color: Colors.green,
+                                            color: Colors.teal[200],
                                           );
                                           shuffleiconnum = 1;
                                         } else {
                                           shuffle = Icon(
                                             Icons.shuffle,
-                                            color: Colors.green,
+                                            color: Colors.teal[200],
                                           );
                                           shuffleiconnum = 0;
                                         }
@@ -569,13 +580,13 @@ class SongsStateagain extends State<SongsAgain>
                                         if (playlistIconNum == 0) {
                                           playli = Icon(
                                             Icons.favorite,
-                                            color: Colors.green,
+                                            color: Colors.teal[200],
                                           );
                                           playlistIconNum = 1;
                                         } else {
                                           playli = Icon(
                                             Icons.favorite_border,
-                                            color: Colors.green,
+                                            color: Colors.teal[200],
                                           );
                                           playlistIconNum = 0;
                                         }
@@ -610,7 +621,7 @@ class SongsStateagain extends State<SongsAgain>
                                       BoxShadow(
                                         color: Colors.grey,
                                         blurRadius: 10,
-                                        offset: Offset(4, 8), // Shadow position
+                                        offset: Offset(4, 8),
                                       ),
                                     ],
                                   ),
@@ -639,7 +650,7 @@ class SongsStateagain extends State<SongsAgain>
                                   width: 100,
                                 ),
                                 Slider(
-                                  inactiveColor: Colors.teal,
+                                  inactiveColor: Colors.teal[200],
                                   activeColor: Colors.redAccent,
                                   min: minmumvalue,
                                   max: maximumvalue,
@@ -669,7 +680,7 @@ class SongsStateagain extends State<SongsAgain>
                                       Text(
                                         currentTime,
                                         style: TextStyle(
-                                            color: Colors.green,
+                                            color: Colors.teal[200],
                                             fontSize: 12.0,
                                             fontWeight: FontWeight.bold),
                                       ),
@@ -679,7 +690,7 @@ class SongsStateagain extends State<SongsAgain>
                                       Text(
                                         endTime,
                                         style: TextStyle(
-                                            color: Colors.green,
+                                            color: Colors.teal[200],
                                             fontSize: 12.0,
                                             fontWeight: FontWeight.bold),
                                       ),
@@ -698,7 +709,7 @@ class SongsStateagain extends State<SongsAgain>
                                       GestureDetector(
                                         child: Icon(
                                             Icons.skip_previous_outlined,
-                                            color: Colors.green,
+                                            color: Colors.teal[200],
                                             size: 55),
                                         behavior: HitTestBehavior.translucent,
                                         onTap: () {
@@ -721,7 +732,7 @@ class SongsStateagain extends State<SongsAgain>
                                       ),
                                       GestureDetector(
                                         child: Icon(Icons.skip_next_outlined,
-                                            color: Colors.green, size: 55),
+                                            color: Colors.teal[200], size: 55),
                                         behavior: HitTestBehavior.translucent,
                                         onTap: () {
                                           changeTrack(true);
@@ -754,6 +765,7 @@ class SongsStateagain extends State<SongsAgain>
                                   icon: Icon(
                                     Icons.skip_previous_outlined,
                                     size: 50,
+                                    color: Colors.teal[200],
                                   ),
                                   onPressed: () {
                                     changeTrack(true);
@@ -775,6 +787,7 @@ class SongsStateagain extends State<SongsAgain>
                                   icon: Icon(
                                     Icons.skip_next_outlined,
                                     size: 50,
+                                    color: Colors.teal[200],
                                   ),
                                   onPressed: () {
                                     changeTrack(false);
@@ -801,14 +814,14 @@ class SongsStateagain extends State<SongsAgain>
                                   style: TextStyle(
                                     fontFamily: 'DancingScript',
                                     fontSize: 15,
-                                    color: Colors.grey,
+                                    color: Colors.teal[200],
                                   ),
                                 ),
                                 Text(
                                   songs[currentIndex].artist,
                                   style: TextStyle(
                                     fontSize: 10,
-                                    color: Colors.grey,
+                                    color: Colors.teal[200],
                                   ),
                                 ),
                               ],
@@ -838,60 +851,52 @@ class SongsStateagain extends State<SongsAgain>
           ],
         ),
       ),
-      backgroundColor: Colors.black,
+      backgroundColor: color,
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentindex,
+        currentIndex: _selectedIndex,
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
         items: [
           BottomNavigationBarItem(
-            icon: new Icon(
-              Icons.home,
-              color: Colors.green,
+            icon: IconButton(
+              onPressed: () {},
+              icon: Icon(Icons.home),
             ),
-            title: Text(
-              'Home',
-              style: TextStyle(color: Colors.green),
-            ),
-          ),
-          BottomNavigationBarItem(
-            icon: GestureDetector(
-              onTap: () {
-                Navigator.push(
-                    context,
-                    (MaterialPageRoute(
-                        builder: (context) => Favourites(
-                              pausePlayer: pausePlayer,
-                            ))));
-              },
-              child: Icon(
-                Icons.playlist_play,
-                color: Colors.green,
-              ),
-            ),
-            title: Text(
-              'Playlist',
-              style: TextStyle(color: Colors.green),
+            title: Text('HOME'),
+            activeIcon: Icon(
+              Feather.home,
             ),
           ),
           BottomNavigationBarItem(
-            icon: GestureDetector(
-              onTap: () {
+            title: Text('Playlist'),
+            icon: IconButton(
+              onPressed: () {
                 Navigator.push(context,
-                    (MaterialPageRoute(builder: (context) => SearchScreen())));
+                    MaterialPageRoute(builder: (context) => Favourites()));
               },
-              child: Icon(
-                Icons.search,
-                color: Colors.green,
+              icon: Icon(
+                Icons.playlist_play,
               ),
             ),
-            title: Text(
-              'Search',
-              style: TextStyle(color: Colors.green),
+          ),
+          BottomNavigationBarItem(
+            title: Text('Search'),
+            icon: IconButton(
+              onPressed: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => SearchScreen()));
+              },
+              icon: Icon(Icons.search),
+            ),
+            activeIcon: Icon(
+              EvilIcons.search,
+              size: 36,
             ),
           ),
         ],
         onTap: (index) {
           setState(() {
-            _currentindex = index;
+            _selectedIndex = index;
           });
         },
       ),
@@ -901,13 +906,7 @@ class SongsStateagain extends State<SongsAgain>
   Widget _buildListViewSongs() {
     return Scrollbar(
       child: DraggableScrollbar.semicircle(
-        labelTextBuilder: (offset) {
-          final int currentItem = offset ~/ 100;
-          var letter = currentItem <= usersList.length - 1
-              ? usersList[currentItem].substring(0, 1)
-              : usersList.last.substring(0, 1);
-          return Text("$letter");
-        },
+        labelTextBuilder: (double offset) => Text("${offset ~/ 40}"),
         controller: _scroll,
         child: ListView.separated(
           controller: _scroll,
@@ -951,7 +950,7 @@ class SongsStateagain extends State<SongsAgain>
               },
             ),
             onTap: () {
-              widget.pausePlayer();
+              // widget.pausePlayer();
               currentIndex = index;
               print("index $index");
               print("current index $currentIndex");

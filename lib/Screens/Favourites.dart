@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app2/Screens/search.dart';
 import 'package:flutter_app2/Screens/songsagain.dart';
 import 'package:flutter_app2/player/player.dart';
 import 'package:flutter_audio_query/flutter_audio_query.dart';
@@ -137,12 +136,12 @@ class _PlaylistState extends State<Favourites> {
     artistName = artistname;
   }
 
-  final color1 = const Color(284756);
+  final color = const Color(0xff284756);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: color,
       body: Stack(
         children: <Widget>[
           Column(
@@ -179,11 +178,11 @@ class _PlaylistState extends State<Favourites> {
                           ),
                           title: Text(
                             songs[index].title,
-                            style: TextStyle(color: Colors.white),
+                            style: TextStyle(color: Colors.teal[200]),
                           ),
                           subtitle: Text(
                             songs[index].artist,
-                            style: TextStyle(color: Colors.white),
+                            style: TextStyle(color: Colors.teal[200]),
                           ),
                           trailing: IconButton(
                             splashColor: Colors.red,
@@ -201,12 +200,8 @@ class _PlaylistState extends State<Favourites> {
                             },
                           ),
                           onTap: () {
-                            widget.pausePlayer();
-
-                            SongsAgain(
-                              pausePlayer: pausePlayer,
-                            );
-
+                            // widget.pausePlayer();
+                            print("TPPED");
                             currentIndex = index;
 
                             setNameOntap(songs[currentIndex].title);
@@ -218,7 +213,9 @@ class _PlaylistState extends State<Favourites> {
                               songInfo: songs[currentIndex],
                               key: key,
                             );
-
+                            SongsAgain(
+                              pausePlayer: pausePlayer,
+                            );
                             setSong(
                               songs[currentIndex],
                             );
@@ -237,13 +234,17 @@ class _PlaylistState extends State<Favourites> {
             ],
           ),
           SlidingUpPanel(
+            border: Border.all(
+              color: Colors.teal[200],
+              width: 2,
+            ),
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(20.0),
               topRight: Radius.circular(24.0),
               bottomLeft: Radius.circular(24.0),
               bottomRight: Radius.circular(24.0),
             ),
-            backdropColor: color1,
+            color: color,
             boxShadow: [],
             padding: EdgeInsets.fromLTRB(0, 0, 0, 10),
             minHeight: 100,
@@ -278,7 +279,7 @@ class _PlaylistState extends State<Favourites> {
                                   child: Text(
                                     titleS,
                                     style: TextStyle(
-                                        color: Colors.cyan[700],
+                                        color: Colors.teal[200],
                                         fontSize: 16.0,
                                         fontWeight: FontWeight.bold),
                                   ),
@@ -292,7 +293,7 @@ class _PlaylistState extends State<Favourites> {
                                   child: Text(
                                     artistName,
                                     style: TextStyle(
-                                        color: Colors.cyan[700],
+                                        color: Colors.teal[200],
                                         fontSize: 12.0,
                                         fontWeight: FontWeight.bold),
                                   ),
@@ -387,7 +388,7 @@ class _PlaylistState extends State<Favourites> {
                                     Text(
                                       currentTime,
                                       style: TextStyle(
-                                          color: Colors.teal[800],
+                                          color: Colors.teal[200],
                                           fontSize: 12.0,
                                           fontWeight: FontWeight.bold),
                                     ),
@@ -397,7 +398,7 @@ class _PlaylistState extends State<Favourites> {
                                     Text(
                                       endTime,
                                       style: TextStyle(
-                                          color: Colors.teal[800],
+                                          color: Colors.teal[200],
                                           fontSize: 12.0,
                                           fontWeight: FontWeight.bold),
                                     ),
@@ -415,7 +416,7 @@ class _PlaylistState extends State<Favourites> {
                                   children: [
                                     GestureDetector(
                                       child: Icon(Icons.skip_previous_outlined,
-                                          color: Colors.cyan[700], size: 55),
+                                          color: Colors.teal[200], size: 55),
                                       behavior: HitTestBehavior.translucent,
                                       onTap: () {
                                         changeTrack(false);
@@ -436,7 +437,7 @@ class _PlaylistState extends State<Favourites> {
                                     ),
                                     GestureDetector(
                                       child: Icon(Icons.skip_next_outlined,
-                                          color: Colors.cyan[700], size: 55),
+                                          color: Colors.teal[200], size: 55),
                                       behavior: HitTestBehavior.translucent,
                                       onTap: () {
                                         changeTrack(true);
@@ -469,6 +470,7 @@ class _PlaylistState extends State<Favourites> {
                                 icon: Icon(
                                   Icons.skip_previous_outlined,
                                   size: 50,
+                                  color: Colors.teal[200],
                                 ),
                                 onPressed: () {
                                   changeTrack(true);
@@ -490,6 +492,7 @@ class _PlaylistState extends State<Favourites> {
                                 icon: Icon(
                                   Icons.skip_next_outlined,
                                   size: 50,
+                                  color: Colors.teal[200],
                                 ),
                                 onPressed: () {
                                   changeTrack(false);
@@ -516,14 +519,14 @@ class _PlaylistState extends State<Favourites> {
                                 style: TextStyle(
                                   fontFamily: 'DancingScript',
                                   fontSize: 15,
-                                  color: Colors.grey,
+                                  color: Colors.teal[200],
                                 ),
                               ),
                               Text(
                                 artistName,
                                 style: TextStyle(
                                   fontSize: 10,
-                                  color: Colors.grey,
+                                  color: Colors.teal[200],
                                 ),
                               ),
                             ],
@@ -552,50 +555,50 @@ class _PlaylistState extends State<Favourites> {
           )
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: [
-          BottomNavigationBarItem(
-            icon: new Icon(
-              Icons.home,
-              color: Colors.green,
-            ),
-            title: Text(
-              'Home',
-              style: TextStyle(color: Colors.green),
-            ),
-          ),
-          BottomNavigationBarItem(
-            icon: GestureDetector(onTap: () {
-              Navigator.pop(context);
-              child:
-              Icon(
-                Icons.playlist_play,
-                color: Colors.green,
-              );
-            }),
-            title: Text(
-              'Playlist',
-              style: TextStyle(color: Colors.red),
-            ),
-          ),
-          BottomNavigationBarItem(
-            icon: GestureDetector(
-              onTap: () {
-                Navigator.push(context,
-                    (MaterialPageRoute(builder: (context) => SearchScreen())));
-              },
-              child: Icon(
-                Icons.search,
-                color: Colors.green,
-              ),
-            ),
-            title: Text(
-              'Search',
-              style: TextStyle(color: Colors.green),
-            ),
-          ),
-        ],
-      ),
+      // bottomNavigationBar: BottomNavigationBar(
+      //   items: [
+      //     BottomNavigationBarItem(
+      //       icon: new Icon(
+      //         Icons.home,
+      //         color: Colors.green,
+      //       ),
+      //       title: Text(
+      //         'Home',
+      //         style: TextStyle(color: Colors.green),
+      //       ),
+      //     ),
+      //     BottomNavigationBarItem(
+      //       icon: GestureDetector(onTap: () {
+      //         Navigator.pop(context);
+      //         child:
+      //         Icon(
+      //           Icons.playlist_play,
+      //           color: Colors.green,
+      //         );
+      //       }),
+      //       title: Text(
+      //         'Playlist',
+      //         style: TextStyle(color: Colors.red),
+      //       ),
+      //     ),
+      //     BottomNavigationBarItem(
+      //       icon: GestureDetector(
+      //         onTap: () {
+      //           Navigator.push(context,
+      //               (MaterialPageRoute(builder: (context) => SearchScreen())));
+      //         },
+      //         child: Icon(
+      //           Icons.search,
+      //           color: Colors.green,
+      //         ),
+      //       ),
+      //       title: Text(
+      //         'Search',
+      //         style: TextStyle(color: Colors.green),
+      //       ),
+      //     ),
+      //   ],
+      // ),
     );
   }
 }
