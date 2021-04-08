@@ -18,11 +18,6 @@ class _MainScreenState extends State<MainScreen> {
     SearchScreen(),
   ];
 
-  songScreen() {
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => SongsAgain()));
-  }
-
   final color = const Color(0xff284756);
   Future<bool> _onBackPressed() {
     return showDialog(
@@ -49,57 +44,54 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-        onWillPop: _onBackPressed,
-        child: Scaffold(
-            backgroundColor: Colors.white,
-            bottomNavigationBar: BottomNavigationBar(
-              backgroundColor: color,
-              currentIndex: _selectedIndex,
-              showSelectedLabels: false,
-              showUnselectedLabels: false,
-              items: [
-                BottomNavigationBarItem(
-                  icon: Icon(
-                    Feather.home,
-                  ),
-                  title: Text('HOME'),
-                  activeIcon: Icon(
-                    Feather.home,
-                  ),
+      onWillPop: _onBackPressed,
+      child: Scaffold(
+          backgroundColor: Colors.white,
+          bottomNavigationBar: BottomNavigationBar(
+            backgroundColor: color,
+            currentIndex: _selectedIndex,
+            showSelectedLabels: false,
+            showUnselectedLabels: false,
+            items: [
+              BottomNavigationBarItem(
+                icon: Icon(
+                  Feather.home,
                 ),
-                BottomNavigationBarItem(
-                  icon: Icon(
-                    Icons.playlist_play,
-                  ),
-                  title: Text('CALENDAR'),
-                  activeIcon: Icon(
-                    Icons.playlist_play,
-                  ),
+                title: Text('Home'),
+                activeIcon: Icon(
+                  Feather.home,
                 ),
-                BottomNavigationBarItem(
-                  icon: Icon(
-                    EvilIcons.search,
-                    size: 36,
-                  ),
-                  title: Text('PROFILE'),
-                  activeIcon: Icon(
-                    EvilIcons.search,
-                    size: 36,
-                  ),
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(
+                  Icons.playlist_play,
                 ),
-              ],
-              onTap: (index) {
-                setState(
-                  () {
-                    _selectedIndex = index;
-                  },
-                );
-              },
-            ),
-            body: Stack(
-              children: [
-                _widgetOptions.elementAt(_selectedIndex),
-              ],
-            )));
+                title: Text('Playlist'),
+                activeIcon: Icon(
+                  Icons.playlist_play,
+                ),
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(
+                  EvilIcons.search,
+                  size: 36,
+                ),
+                title: Text('Search'),
+                activeIcon: Icon(
+                  EvilIcons.search,
+                  size: 36,
+                ),
+              ),
+            ],
+            onTap: (index) {
+              setState(
+                () {
+                  _selectedIndex = index;
+                },
+              );
+            },
+          ),
+          body: _widgetOptions[_selectedIndex]),
+    );
   }
 }

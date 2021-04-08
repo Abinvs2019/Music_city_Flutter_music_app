@@ -286,7 +286,7 @@ class SongsStateagain extends State<SongsAgain>
     artistName = artistname;
   }
 
-  final color = const Color(0xff284756);
+  final color = const Color(0xff708090);
 
   List<Widget> _widgetOptions = <Widget>[
     SongsAgain(),
@@ -463,7 +463,7 @@ class SongsStateagain extends State<SongsAgain>
           title: Text(
             'musizcity.',
             style: TextStyle(
-              color: Colors.red,
+              color: Colors.teal[500],
               fontSize: 40,
             ),
           ),
@@ -945,7 +945,7 @@ class SongsStateagain extends State<SongsAgain>
             trailing: IconButton(
               icon: Icon(
                 Icons.favorite_outline,
-                color: Colors.green,
+                color: Colors.teal[200],
               ),
               onPressed: () async {
                 savedList = await Hive.openBox('Musicbox');
