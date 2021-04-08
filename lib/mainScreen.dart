@@ -18,54 +18,88 @@ class _MainScreenState extends State<MainScreen> {
     SearchScreen(),
   ];
 
+  songScreen() {
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => SongsAgain()));
+  }
+
   final color = const Color(0xff284756);
+  Future<bool> _onBackPressed() {
+    return showDialog(
+          context: context,
+          builder: (context) => new AlertDialog(
+            title: new Text('Are you sure?'),
+            content: new Text('Do you want to exit App...'),
+            actions: <Widget>[
+              new GestureDetector(
+                onTap: () => Navigator.of(context).pop(false),
+                child: Text("NO"),
+              ),
+              SizedBox(height: 16),
+              new GestureDetector(
+                onTap: () => Navigator.of(context).pop(true),
+                child: Text("YES"),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: color,
-        currentIndex: _selectedIndex,
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(
-              Feather.home,
+    return WillPopScope(
+        onWillPop: _onBackPressed,
+        child: Scaffold(
+            backgroundColor: Colors.white,
+            bottomNavigationBar: BottomNavigationBar(
+              backgroundColor: color,
+              currentIndex: _selectedIndex,
+              showSelectedLabels: false,
+              showUnselectedLabels: false,
+              items: [
+                BottomNavigationBarItem(
+                  icon: Icon(
+                    Feather.home,
+                  ),
+                  title: Text('HOME'),
+                  activeIcon: Icon(
+                    Feather.home,
+                  ),
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(
+                    Icons.playlist_play,
+                  ),
+                  title: Text('CALENDAR'),
+                  activeIcon: Icon(
+                    Icons.playlist_play,
+                  ),
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(
+                    EvilIcons.search,
+                    size: 36,
+                  ),
+                  title: Text('PROFILE'),
+                  activeIcon: Icon(
+                    EvilIcons.search,
+                    size: 36,
+                  ),
+                ),
+              ],
+              onTap: (index) {
+                setState(
+                  () {
+                    _selectedIndex = index;
+                  },
+                );
+              },
             ),
-            title: Text('HOME'),
-            activeIcon: Icon(
-              Feather.home,
-            ),
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.playlist_play,
-            ),
-            title: Text('CALENDAR'),
-            activeIcon: Icon(
-              Icons.playlist_play,
-            ),
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              EvilIcons.search,
-              size: 36,
-            ),
-            title: Text('PROFILE'),
-            activeIcon: Icon(
-              EvilIcons.search,
-              size: 36,
-            ),
-          ),
-        ],
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-      ),
-      body: _widgetOptions.elementAt(_selectedIndex),
-    );
+            body: Stack(
+              children: [
+                _widgetOptions.elementAt(_selectedIndex),
+              ],
+            )));
   }
 }

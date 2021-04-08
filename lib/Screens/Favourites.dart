@@ -200,7 +200,7 @@ class _PlaylistState extends State<Favourites> {
                             },
                           ),
                           onTap: () {
-                            // widget.pausePlayer();
+                            widget.pausePlayer();
                             print("TPPED");
                             currentIndex = index;
 

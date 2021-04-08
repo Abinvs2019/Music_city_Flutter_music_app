@@ -29,7 +29,6 @@ class SongsAgain extends StatefulWidget {
 class SongsStateagain extends State<SongsAgain>
     with SingleTickerProviderStateMixin {
   final ScrollController _scroll = ScrollController();
-  final TextEditingController _searchText = new TextEditingController();
   final FlutterAudioQuery audioQuery = FlutterAudioQuery();
   final GlobalKey<SongsStateagain> key = GlobalKey<SongsStateagain>();
   final AudioPlayer player = AudioPlayer();
@@ -64,22 +63,22 @@ class SongsStateagain extends State<SongsAgain>
 
     changeState();
 
-    getNames();
+    // getNames();
   }
 
-  getNames() {
-    for (int i = 0; i < songs.length; i++) {
-      usersList.add(songs.toString());
-      print(usersList);
-    }
-// faker.person.name() ////avoid theuserlistandaddSongsLISTto use//////
-    //sort the list
-    usersList.sort(
-      (a, b) {
-        return a.toLowerCase().compareTo(b.toLowerCase());
-      },
-    );
-  }
+//   getNames() {
+//     for (int i = 0; i < songs.length; i++) {
+//       usersList.add(songs.toString());
+//       print(usersList);
+//     }
+// // faker.person.name() ////avoid theuserlistandaddSongsLISTto use//////
+//     //sort the list
+//     usersList.sort(
+//       (a, b) {
+//         return a.toLowerCase().compareTo(b.toLowerCase());
+//       },
+//     );
+//   }
 
   void getTracks() async {
     songs = await audioQuery.getSongs();
@@ -92,13 +91,13 @@ class SongsStateagain extends State<SongsAgain>
 
         MediaNotification.setListener('play', () {
           setState(
-            () => status = playPlayer(),
+            () => status = changeState(),
           );
         });
 
         MediaNotification.setListener('pause', () {
           setState(
-            () => status = pausePlayer(),
+            () => status = changeState(),
           );
         });
 
@@ -197,20 +196,22 @@ class SongsStateagain extends State<SongsAgain>
       }
     }
     setSong(songs[currentIndex]);
+    setNameOntap(songs[currentIndex].title);
+    setArtistOntap(songs[currentIndex].artist);
     print("SetSongCurrentIndex $currentIndex");
   }
 
-  final tabs = [
-    SafeArea(
-      child: SongsAgain(),
-    ),
-    SafeArea(
-      child: Favourites(),
-    ),
-    SafeArea(
-      child: SearchScreen(),
-    ),
-  ];
+  // final tabs = [
+  //   SafeArea(
+  //     child: SongsAgain(),
+  //   ),
+  //   SafeArea(
+  //     child: Favourites(),
+  //   ),
+  //   SafeArea(
+  //     child: SearchScreen(),
+  //   ),
+  // ];
 
   void dispose() {
     super.dispose();
@@ -230,10 +231,6 @@ class SongsStateagain extends State<SongsAgain>
   //   savedList = await Hive.openBox('Musicbox');
   //   print("Box opened");
   // }
-
-  searhSong() async {
-    songs = await audioQuery.searchSongs(query: _searchText.text);
-  }
 
   int _selectedIndex = 0;
   Timer _timer;
@@ -275,6 +272,18 @@ class SongsStateagain extends State<SongsAgain>
         }
       },
     );
+  }
+
+  String titleS = "";
+
+  setNameOntap(String title) {
+    titleS = title;
+  }
+
+  String artistName = "";
+
+  setArtistOntap(String artistname) {
+    artistName = artistname;
   }
 
   final color = const Color(0xff284756);
@@ -507,7 +516,7 @@ class SongsStateagain extends State<SongsAgain>
                                   margin: EdgeInsets.fromLTRB(30, 10, 0, 0),
                                   child: Center(
                                     child: Text(
-                                      songs[currentIndex].title,
+                                      titleS,
                                       style: TextStyle(
                                           color: Colors.teal[200],
                                           fontSize: 16.0,
@@ -521,7 +530,7 @@ class SongsStateagain extends State<SongsAgain>
                                   margin: EdgeInsets.fromLTRB(0, 0, 0, 15),
                                   child: Center(
                                     child: Text(
-                                      songs[currentIndex].artist,
+                                      artistName,
                                       style: TextStyle(
                                           color: Colors.teal[200],
                                           fontSize: 12.0,
@@ -611,6 +620,12 @@ class SongsStateagain extends State<SongsAgain>
                                         songs[currentIndex].id, songFav);
 
                                     print("saved savedList");
+
+                                    Scaffold.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text("Added to Favorite"),
+                                      ),
+                                    );
                                   },
                                 ),
                                 Container(
@@ -852,54 +867,54 @@ class SongsStateagain extends State<SongsAgain>
         ),
       ),
       backgroundColor: color,
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        items: [
-          BottomNavigationBarItem(
-            icon: IconButton(
-              onPressed: () {},
-              icon: Icon(Icons.home),
-            ),
-            title: Text('HOME'),
-            activeIcon: Icon(
-              Feather.home,
-            ),
-          ),
-          BottomNavigationBarItem(
-            title: Text('Playlist'),
-            icon: IconButton(
-              onPressed: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => Favourites()));
-              },
-              icon: Icon(
-                Icons.playlist_play,
-              ),
-            ),
-          ),
-          BottomNavigationBarItem(
-            title: Text('Search'),
-            icon: IconButton(
-              onPressed: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => SearchScreen()));
-              },
-              icon: Icon(Icons.search),
-            ),
-            activeIcon: Icon(
-              EvilIcons.search,
-              size: 36,
-            ),
-          ),
-        ],
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-      ),
+      // bottomNavigationBar: BottomNavigationBar(
+      //   currentIndex: _selectedIndex,
+      //   showSelectedLabels: false,
+      //   showUnselectedLabels: false,
+      //   items: [
+      //     BottomNavigationBarItem(
+      //       icon: IconButton(
+      //         onPressed: () {},
+      //         icon: Icon(Icons.home),
+      //       ),
+      //       title: Text('HOME'),
+      //       activeIcon: Icon(
+      //         Feather.home,
+      //       ),
+      //     ),
+      //     BottomNavigationBarItem(
+      //       title: Text('Playlist'),
+      //       icon: IconButton(
+      //         onPressed: () {
+      //           Navigator.push(context,
+      //               MaterialPageRoute(builder: (context) => Favourites()));
+      //         },
+      //         icon: Icon(
+      //           Icons.playlist_play,
+      //         ),
+      //       ),
+      //     ),
+      //     BottomNavigationBarItem(
+      //       title: Text('Search'),
+      //       icon: IconButton(
+      //         onPressed: () {
+      //           Navigator.push(context,
+      //               MaterialPageRoute(builder: (context) => SearchScreen()));
+      //         },
+      //         icon: Icon(Icons.search),
+      //       ),
+      //       activeIcon: Icon(
+      //         EvilIcons.search,
+      //         size: 36,
+      //       ),
+      //     ),
+      //   ],
+      //   onTap: (index) {
+      //     setState(() {
+      //       _selectedIndex = index;
+      //     });
+      //   },
+      // ),
     );
   }
 
@@ -942,6 +957,8 @@ class SongsStateagain extends State<SongsAgain>
 
                 savedList.put(songs[currentIndex].id, songFav);
 
+                print("saved savedList");
+
                 Scaffold.of(context).showSnackBar(
                   SnackBar(
                     content: Text("Added to Favorite"),
@@ -956,6 +973,9 @@ class SongsStateagain extends State<SongsAgain>
               print("current index $currentIndex");
               SongsAgain(songInfo: songs[currentIndex], key: key);
               print(currentIndex);
+
+              setNameOntap(songs[currentIndex].title);
+              setArtistOntap(songs[currentIndex].artist);
 
               setSong(
                 songs[currentIndex],

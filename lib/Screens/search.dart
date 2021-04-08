@@ -39,74 +39,94 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: [
-          TextField(
-            controller: _searchText,
-            onChanged: (value) {
-              setState(() {
+    return SafeArea(
+        child: Scaffold(
+      backgroundColor: color,
+      appBar: AppBar(
+        backgroundColor: color,
+        title: TextField(
+          controller: _searchText,
+          onChanged: (value) {
+            setState(
+              () {
                 searhSong();
-              });
-            },
-            decoration: InputDecoration(
-                prefixIcon: Icon(
-                  Icons.search,
-                  color: Colors.teal[200],
-                ),
-                border: InputBorder.none,
-                hintText: 'Enter a search term'),
+              },
+            );
+          },
+          decoration: InputDecoration(
+            border: OutlineInputBorder(),
+            hintText: 'Enter a search',
           ),
-          _buildListViewSongs(),
-        ],
-        // bottomNavigationBar: BottomNavigationBar(
-        //   items: [
-        //     BottomNavigationBarItem(
-        //       icon: GestureDetector(onTap: () {
-        //         Navigator.pop(context,
-        //             MaterialPageRoute(builder: (context) => SongsAgain()));
-        //         Icon(
-        //           Icons.playlist_play,
-        //           color: Colors.green,
-        //         );
-        //       }),
-        //       title: Text(
-        //         'Home',
-        //         style: TextStyle(color: Colors.red),
-        //       ),
-        //     ),
-        //     BottomNavigationBarItem(
-        //       icon: GestureDetector(onTap: () {
-        //         Navigator.pop(
-        //             context, MaterialPageRoute(builder: (context) => Playlist()));
-        //         child:
-        //         Icon(
-        //           Icons.playlist_play,
-        //           color: Colors.red,
-        //         );
-        //       }),
-        //       title: Text(
-        //         'Playlist',
-        //         style: TextStyle(color: Colors.red),
-        //       ),
-        //     ),
-        //     BottomNavigationBarItem(
-        //       icon: GestureDetector(
-        //         onTap: () {},
-        //         child: Icon(
-        //           Icons.search,
-        //           color: Colors.teal,
-        //         ),
-        //       ),
-        //       title: Text(
-        //         'Search',
-        //         style: TextStyle(color: Colors.green),
-        //       ),
-        //     ),
-        //   ],
-        // ),
+        ),
       ),
-    );
+      body:
+          //  Column(
+          //   children: [
+          // TextField(
+          //   // controller: _searchText,
+          //   onChanged: (value) {
+          //     setState(() {
+          //       searhSong();
+          //     });
+          //   },
+          //   decoration: InputDecoration(
+          //       prefixIcon: Icon(
+          //         Icons.search,
+          //         color: Colors.teal[200],
+          //       ),
+          //       border: InputBorder.none,
+          //       hintText: 'Enter a search term'),
+          // ),
+          _buildListViewSongs(),
+      // "],"
+      // bottomNavigationBar: BottomNavigationBar(
+      //   items: [
+      //     BottomNavigationBarItem(
+      //       icon: GestureDetector(onTap: () {
+      //         Navigator.pop(context,
+      //             MaterialPageRoute(builder: (context) => SongsAgain()));
+      //         Icon(
+      //           Icons.playlist_play,
+      //           color: Colors.green,
+      //         );
+      //       }),
+      //       title: Text(
+      //         'Home',
+      //         style: TextStyle(color: Colors.red),
+      //       ),
+      //     ),
+      //     BottomNavigationBarItem(
+      //       icon: GestureDetector(onTap: () {
+      //         Navigator.pop(
+      //             context, MaterialPageRoute(builder: (context) => Playlist()));
+      //         child:
+      //         Icon(
+      //           Icons.playlist_play,
+      //           color: Colors.red,
+      //         );
+      //       }),
+      //       title: Text(
+      //         'Playlist',
+      //         style: TextStyle(color: Colors.red),
+      //       ),
+      //     ),
+      //     BottomNavigationBarItem(
+      //       icon: GestureDetector(
+      //         onTap: () {},
+      //         child: Icon(
+      //           Icons.search,
+      //           color: Colors.teal,
+      //         ),
+      //       ),
+      //       title: Text(
+      //         'Search',
+      //         style: TextStyle(color: Colors.green),
+      //       ),
+      //     ),
+      //   ],
+    ) // ),
+        // ),
+        );
   }
 
   var savedList;
@@ -147,14 +167,9 @@ class _SearchScreenState extends State<SearchScreen> {
         onTap: () {
           print("object");
           int currentIndex = index;
-          Navigator.push(
-            context,
-            (MaterialPageRoute(
-              builder: (context) => SongsAgain(
-                key: key,
-                songInfo: songs[currentIndex],
-              ),
-            )),
+          SongsAgain(
+            key: key,
+            songInfo: songs[currentIndex],
           );
         },
       ),
