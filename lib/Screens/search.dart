@@ -4,6 +4,7 @@ import 'package:flutter_app2/Playlist/playList.dart';
 import 'package:flutter_app2/Screens/songsagain.dart';
 import 'package:flutter_app2/mainScreen.dart';
 import 'package:flutter_app2/model/hive_helper.dart';
+import 'package:flutter_app2/player/player.dart';
 import 'package:flutter_audio_query/flutter_audio_query.dart';
 import 'package:hive/hive.dart';
 
@@ -168,9 +169,8 @@ class _SearchScreenState extends State<SearchScreen> {
         onTap: () {
           print("object");
           int currentIndex = index;
-          SongsAgain(
+          MusicPlayer(
             songInfo: songs[currentIndex],
-            key: key,
           );
         },
       ),

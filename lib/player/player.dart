@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_audio_query/flutter_audio_query.dart';
@@ -89,10 +88,10 @@ class MusicPlayerState extends State<MusicPlayer> {
   Widget build(context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.grey,
         title: Text(
           "NOW PLAYING",
-          style: TextStyle(color: Colors.green),
+          style: TextStyle(color: Colors.teal[200]),
         ),
         leading: IconButton(
             icon: Icon(Icons.keyboard_arrow_down),
@@ -117,7 +116,7 @@ class MusicPlayerState extends State<MusicPlayer> {
               child: Text(
                 widget.songInfo.title,
                 style: TextStyle(
-                    color: Colors.green,
+                    color: Colors.teal[200],
                     fontSize: 16.0,
                     fontWeight: FontWeight.bold),
               ),
@@ -127,13 +126,13 @@ class MusicPlayerState extends State<MusicPlayer> {
               child: Text(
                 widget.songInfo.artist,
                 style: TextStyle(
-                    color: Colors.green,
+                    color: Colors.teal[200],
                     fontSize: 12.0,
                     fontWeight: FontWeight.bold),
               ),
             ),
             Slider(
-              inactiveColor: Colors.green,
+              inactiveColor: Colors.teal[200],
               activeColor: Colors.redAccent,
               min: minmumvalue,
               max: maximumvalue,
@@ -160,14 +159,14 @@ class MusicPlayerState extends State<MusicPlayer> {
                   Text(
                     currentTime,
                     style: TextStyle(
-                        color: Colors.green,
+                        color: Colors.teal[200],
                         fontSize: 12.0,
                         fontWeight: FontWeight.bold),
                   ),
                   Text(
                     endTime,
                     style: TextStyle(
-                        color: Colors.green,
+                        color: Colors.teal[200],
                         fontSize: 12.0,
                         fontWeight: FontWeight.bold),
                   )
