@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
-        home: MainScreen());
+        home: HomePage());
   }
 }
 
@@ -52,8 +52,8 @@ class HomePage extends StatelessWidget {
                     color: Colors.white),
                 child: CircleAvatar(
                   radius: 100,
-                  backgroundImage: NetworkImage(
-                      "https://ak.picdn.net/shutterstock/videos/14229665/thumb/1.jpg"),
+                  backgroundImage: AssetImage(
+                      "android/assets/images/Music App Icon (1).png"),
                 ),
               ),
               Divider(

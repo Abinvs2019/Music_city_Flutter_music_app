@@ -212,7 +212,7 @@ class MusicPlayerState extends State<MusicPlayer> {
           ],
         ),
       ),
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.grey,
     );
   }
 }

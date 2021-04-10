@@ -16,11 +16,11 @@ import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 class SongsAgain extends StatefulWidget {
   SongInfo songInfo;
-  Function pausePlayer;
+  Function pauseplayer;
 
   final GlobalKey<SongsStateagain> key;
 
-  SongsAgain({this.songInfo, this.key, this.pausePlayer}) : super(key: key);
+  SongsAgain({this.songInfo, this.key, this.pauseplayer}) : super(key: key);
 
   @override
   SongsStateagain createState() => SongsStateagain();
@@ -286,7 +286,7 @@ class SongsStateagain extends State<SongsAgain>
     artistName = artistname;
   }
 
-  final color = const Color(0xff708090);
+  final color = const Color(0xff121212);
 
   List<Widget> _widgetOptions = <Widget>[
     SongsAgain(),
@@ -336,11 +336,11 @@ class SongsStateagain extends State<SongsAgain>
                             ),
                             onTap: () {
                               startTimer(10);
-                              // Scaffold.of(context).showSnackBar(
-                              //   SnackBar(
-                              //     content: Text("Timer Set to 10 Seconds"),
-                              //   ),
-                              // );
+                              Scaffold.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text("Timer Set to 10 Seconds"),
+                                ),
+                              );
                               Navigator.pop(context);
                             },
                           ),
@@ -357,11 +357,11 @@ class SongsStateagain extends State<SongsAgain>
                             ),
                             onTap: () {
                               startTimer(600);
-                              // Scaffold.of(context).showSnackBar(
-                              //   SnackBar(
-                              //     content: Text("TImer Set To 10 minutes"),
-                              //   ),
-                              // );
+                              Scaffold.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text("TImer Set To 10 minutes"),
+                                ),
+                              );
                               Navigator.pop(context);
                             },
                           ),
@@ -399,11 +399,11 @@ class SongsStateagain extends State<SongsAgain>
                             ),
                             onTap: () {
                               startTimer(3600);
-                              // Scaffold.of(context).showSnackBar(
-                              //   SnackBar(
-                              //     content: Text("Timer Set to 60 Minutes"),
-                              //   ),
-                              // );
+                              Scaffold.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text("Timer Set to 60 Minutes"),
+                                ),
+                              );
                               Navigator.pop(context);
                             },
                           ),
@@ -420,12 +420,12 @@ class SongsStateagain extends State<SongsAgain>
                             ),
                             onTap: () {
                               timerOnTrackfinish();
-                              // Scaffold.of(context).showSnackBar(
-                              //   SnackBar(
-                              //     content:
-                              //         Text("Timer Set to End Of the track"),
-                              //   ),
-                              // );
+                              Scaffold.of(context).showSnackBar(
+                                SnackBar(
+                                  content:
+                                      Text("Timer Set to End Of the track"),
+                                ),
+                              );
                               Navigator.pop(context);
                             },
                           ),
@@ -442,11 +442,11 @@ class SongsStateagain extends State<SongsAgain>
                             ),
                             onTap: () {
                               stopTimer();
-                              // Scaffold.of(context).showSnackBar(
-                              //   SnackBar(
-                              //     content: Text("Timer OFF"),
-                              //   ),
-                              // );
+                              Scaffold.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text("Timer OFF"),
+                                ),
+                              );
                               Navigator.pop(context);
                             },
                           )
@@ -459,11 +459,11 @@ class SongsStateagain extends State<SongsAgain>
             )
           ],
           backgroundColor: color,
-          leading: Icon(Icons.music_note, color: Colors.green),
+          leading: Icon(Icons.music_note, color: Colors.teal[200]),
           title: Text(
             'musizcity.',
             style: TextStyle(
-              color: Colors.teal[500],
+              color: Colors.teal[200],
               fontSize: 40,
             ),
           ),
@@ -489,7 +489,7 @@ class SongsStateagain extends State<SongsAgain>
               minHeight: 100,
               // color: Colors.black,
               maxHeight: 1000,
-              margin: const EdgeInsets.all(20.0),
+              margin: const EdgeInsets.all(18.0),
               panel: Container(
                 decoration: BoxDecoration(
                   borderRadius: new BorderRadius.only(
@@ -499,7 +499,6 @@ class SongsStateagain extends State<SongsAgain>
                     bottomRight: const Radius.circular(40.0),
                   ),
                 ),
-
                 child: Column(
                   children: <Widget>[
                     Container(
@@ -601,19 +600,11 @@ class SongsStateagain extends State<SongsAgain>
                                         }
                                       },
                                     );
-                                    // final newMusic = SongPlayList()
-                                    //   ..songInfo = songs[currentIndex].id;
-                                    // print("object");
-                                    // print(newMusic);
-                                    // addMusic(newMusic, songs[currentIndex].id);
-                                    // savedList.keys
-                                    //     .contains(songs[currentIndex].id);
+
                                     savedList = await Hive.openBox('Musicbox');
                                     var songFav = SongPlayList()
                                       ..songInfo = songs[currentIndex].id;
 
-                                    // print(songs[currentIndex].id);
-                                    // print(songFav);
                                     print(songs[currentIndex].id);
 
                                     savedList.put(
@@ -764,7 +755,6 @@ class SongsStateagain extends State<SongsAgain>
                     ),
                   ],
                 ),
-                // color: Colors.pink[900],
               ),
               collapsed: Container(
                 child: Padding(
@@ -866,60 +856,69 @@ class SongsStateagain extends State<SongsAgain>
           ],
         ),
       ),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: color,
+        currentIndex: _selectedIndex,
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
+        items: [
+          BottomNavigationBarItem(
+            icon: IconButton(
+              icon: Icon(
+                Icons.home,
+                color: Colors.teal[200],
+                size: 30,
+              ),
+              onPressed: () {},
+            ),
+            title: Text(
+              'Home',
+              style: TextStyle(color: Colors.teal[200]),
+            ),
+          ),
+          BottomNavigationBarItem(
+            icon: IconButton(
+              icon: Icon(Icons.favorite_outline_outlined,
+                  color: Colors.teal[200]),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Favourites(
+                      pausePlayer: pausePlayer,
+                    ),
+                  ),
+                );
+              },
+            ),
+            title: Text('Playlist'),
+          ),
+          BottomNavigationBarItem(
+            icon: IconButton(
+              icon: Icon(Icons.search, color: Colors.teal[200]),
+              onPressed: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => SearchScreen()));
+              },
+            ),
+            title: Text('Search'),
+          ),
+        ],
+        onTap: (index) {
+          setState(
+            () {
+              _selectedIndex = index;
+            },
+          );
+        },
+      ),
       backgroundColor: color,
-      // bottomNavigationBar: BottomNavigationBar(
-      //   currentIndex: _selectedIndex,
-      //   showSelectedLabels: false,
-      //   showUnselectedLabels: false,
-      //   items: [
-      //     BottomNavigationBarItem(
-      //       icon: IconButton(
-      //         onPressed: () {},
-      //         icon: Icon(Icons.home),
-      //       ),
-      //       title: Text('HOME'),
-      //       activeIcon: Icon(
-      //         Feather.home,
-      //       ),
-      //     ),
-      //     BottomNavigationBarItem(
-      //       title: Text('Playlist'),
-      //       icon: IconButton(
-      //         onPressed: () {
-      //           Navigator.push(context,
-      //               MaterialPageRoute(builder: (context) => Favourites()));
-      //         },
-      //         icon: Icon(
-      //           Icons.playlist_play,
-      //         ),
-      //       ),
-      //     ),
-      //     BottomNavigationBarItem(
-      //       title: Text('Search'),
-      //       icon: IconButton(
-      //         onPressed: () {
-      //           Navigator.push(context,
-      //               MaterialPageRoute(builder: (context) => SearchScreen()));
-      //         },
-      //         icon: Icon(Icons.search),
-      //       ),
-      //       activeIcon: Icon(
-      //         EvilIcons.search,
-      //         size: 36,
-      //       ),
-      //     ),
-      //   ],
-      //   onTap: (index) {
-      //     setState(() {
-      //       _selectedIndex = index;
-      //     });
-      //   },
-      // ),
     );
   }
 
   Widget _buildListViewSongs() {
     return Scrollbar(
+      radius: Radius.circular(50),
       child: DraggableScrollbar.semicircle(
         labelTextBuilder: (double offset) => Text("${offset ~/ 40}"),
         controller: _scroll,
@@ -949,10 +948,9 @@ class SongsStateagain extends State<SongsAgain>
               ),
               onPressed: () async {
                 savedList = await Hive.openBox('Musicbox');
+
                 var songFav = SongPlayList()..songInfo = songs[currentIndex].id;
 
-                // print(songs[currentIndex].id);
-                // print(songFav);
                 print(songs[currentIndex].id);
 
                 savedList.put(songs[currentIndex].id, songFav);
@@ -967,7 +965,6 @@ class SongsStateagain extends State<SongsAgain>
               },
             ),
             onTap: () {
-              // widget.pausePlayer();
               currentIndex = index;
               print("index $index");
               print("current index $currentIndex");
@@ -980,6 +977,7 @@ class SongsStateagain extends State<SongsAgain>
               setSong(
                 songs[currentIndex],
               );
+              widget.pauseplayer();
             },
           ),
         ),

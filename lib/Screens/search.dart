@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_app2/Playlist/playList.dart';
+import 'package:flutter_app2/Screens/Favourites.dart';
 import 'package:flutter_app2/Screens/songsagain.dart';
 import 'package:flutter_app2/mainScreen.dart';
 import 'package:flutter_app2/model/hive_helper.dart';
@@ -41,8 +42,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-        child: Scaffold(
+    return Scaffold(
       backgroundColor: color,
       appBar: AppBar(
         backgroundColor: color,
@@ -61,74 +61,45 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
         ),
       ),
-      body:
-          //  Column(
-          //   children: [
-          // TextField(
-          //   // controller: _searchText,
-          //   onChanged: (value) {
-          //     setState(() {
-          //       searhSong();
-          //     });
-          //   },
-          //   decoration: InputDecoration(
-          //       prefixIcon: Icon(
-          //         Icons.search,
-          //         color: Colors.teal[200],
-          //       ),
-          //       border: InputBorder.none,
-          //       hintText: 'Enter a search term'),
-          // ),
-          _buildListViewSongs(),
-      // "],"
-      // bottomNavigationBar: BottomNavigationBar(
-      //   items: [
-      //     BottomNavigationBarItem(
-      //       icon: GestureDetector(onTap: () {
-      //         Navigator.pop(context,
-      //             MaterialPageRoute(builder: (context) => SongsAgain()));
-      //         Icon(
-      //           Icons.playlist_play,
-      //           color: Colors.green,
-      //         );
-      //       }),
-      //       title: Text(
-      //         'Home',
-      //         style: TextStyle(color: Colors.red),
-      //       ),
-      //     ),
-      //     BottomNavigationBarItem(
-      //       icon: GestureDetector(onTap: () {
-      //         Navigator.pop(
-      //             context, MaterialPageRoute(builder: (context) => Playlist()));
-      //         child:
-      //         Icon(
-      //           Icons.playlist_play,
-      //           color: Colors.red,
-      //         );
-      //       }),
-      //       title: Text(
-      //         'Playlist',
-      //         style: TextStyle(color: Colors.red),
-      //       ),
-      //     ),
-      //     BottomNavigationBarItem(
-      //       icon: GestureDetector(
-      //         onTap: () {},
-      //         child: Icon(
-      //           Icons.search,
-      //           color: Colors.teal,
-      //         ),
-      //       ),
-      //       title: Text(
-      //         'Search',
-      //         style: TextStyle(color: Colors.green),
-      //       ),
-      //     ),
-      //   ],
-    ) // ),
-        // ),
-        );
+      body: _buildListViewSongs(),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: color,
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
+        items: [
+          BottomNavigationBarItem(
+            icon: IconButton(
+              icon: Icon(Icons.home, color: Colors.black),
+              onPressed: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => SongsAgain()));
+              },
+            ),
+            title: Text('Home'),
+          ),
+          BottomNavigationBarItem(
+            icon: IconButton(
+              icon: Icon(Icons.favorite_outline_outlined, color: Colors.black),
+              onPressed: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => Favourites()));
+              },
+            ),
+            title: Text('Playlist'),
+          ),
+          BottomNavigationBarItem(
+            icon: IconButton(
+              icon: Icon(
+                Icons.search,
+                color: Colors.teal[200],
+              ),
+              onPressed: () {},
+            ),
+            title: Text('Search'),
+          ),
+        ],
+      ),
+    );
   }
 
   var savedList;
@@ -159,8 +130,6 @@ class _SearchScreenState extends State<SearchScreen> {
             savedList = await Hive.openBox('Musicbox');
             var songFav = SongPlayList()..songInfo = songs[currentIndex].id;
 
-            // print(songs[currentIndex].id);
-            // print(songFav);
             print(songs[currentIndex].id);
 
             savedList.put(songs[currentIndex].id, songFav);
