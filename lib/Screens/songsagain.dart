@@ -64,20 +64,22 @@ class SongsStateagain extends State<SongsAgain>
     changeState();
 
     // getNames();
+    // print(songs[4]);
+    // for (int i = 0; i < 1000; i++) {
+    //   usersList.add(songs[4].toString());
+    // }
+    // usersList.sort(
+    //   (a, b) {
+    //     return a.toLowerCase().compareTo(b.toLowerCase());
+    //   },
+    // );
   }
-
+// faker.person.name()
 //   getNames() {
-//     for (int i = 0; i < songs.length; i++) {
-//       usersList.add(songs.toString());
-//       print(usersList);
-//     }
+//
 // // faker.person.name() ////avoid theuserlistandaddSongsLISTto use//////
 //     //sort the list
-//     usersList.sort(
-//       (a, b) {
-//         return a.toLowerCase().compareTo(b.toLowerCase());
-//       },
-//     );
+//
 //   }
 
   void getTracks() async {
@@ -918,9 +920,18 @@ class SongsStateagain extends State<SongsAgain>
 
   Widget _buildListViewSongs() {
     return Scrollbar(
-      radius: Radius.circular(50),
+      radius: Radius.circular(25),
       child: DraggableScrollbar.semicircle(
         labelTextBuilder: (double offset) => Text("${offset ~/ 40}"),
+
+        // labelTextBuilder: (offset) {
+        //   final int currentItem = offset ~/ 100;
+        //   var letter = currentItem <= usersList.length - 1
+        //       ? usersList[currentItem].substring(0, 1)
+        //       : usersList.last.substring(0, 1);
+        //   return Text("$letter");
+        // },
+
         controller: _scroll,
         child: ListView.separated(
           controller: _scroll,
@@ -966,9 +977,13 @@ class SongsStateagain extends State<SongsAgain>
             ),
             onTap: () {
               currentIndex = index;
+
               print("index $index");
+
               print("current index $currentIndex");
+
               SongsAgain(songInfo: songs[currentIndex], key: key);
+
               print(currentIndex);
 
               setNameOntap(songs[currentIndex].title);
@@ -977,7 +992,7 @@ class SongsStateagain extends State<SongsAgain>
               setSong(
                 songs[currentIndex],
               );
-              widget.pauseplayer();
+              // widget.pauseplayer();
             },
           ),
         ),

@@ -137,7 +137,7 @@ class _PlaylistState extends State<Favourites> {
     artistName = artistname;
   }
 
-  final color = const Color(0xff284756);
+  final color = const Color(0xff121212);
 
   @override
   Widget build(BuildContext context) {
@@ -201,7 +201,7 @@ class _PlaylistState extends State<Favourites> {
                             },
                           ),
                           onTap: () {
-                            print("TPPED");
+                            print("TPPPPPED");
                             currentIndex = index;
 
                             widget.pausePlayer();
@@ -219,9 +219,11 @@ class _PlaylistState extends State<Favourites> {
                             setSong(
                               songs[currentIndex],
                             );
+
                             SongsAgain(
                               pauseplayer: pausePlayer,
                             );
+
                             print(currentIndex);
                           },
                         ),
@@ -566,6 +568,7 @@ class _PlaylistState extends State<Favourites> {
               icon: Icon(Icons.home, color: Colors.black),
               onPressed: () {
                 Navigator.pop(context);
+
                 SongsAgain(
                   pauseplayer: pausePlayer,
                 );
