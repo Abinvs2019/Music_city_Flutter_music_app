@@ -15,12 +15,12 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
-  final GlobalKey<SongsStateagain> key = GlobalKey<SongsStateagain>();
+  final GlobalKey<MusicPlayerState> key = GlobalKey<MusicPlayerState>();
   final FlutterAudioQuery audioQuery = FlutterAudioQuery();
   final TextEditingController _searchText = new TextEditingController();
   List<SongInfo> songs = [];
   int currentIndex = 0;
-
+  List<SongInfo> songsOfArtist;
   void initState() {
     super.initState();
     searhSong();
@@ -36,8 +36,16 @@ class _SearchScreenState extends State<SearchScreen> {
 
   searhSong() async {
     songs = await audioQuery.searchSongs(query: _searchText.text);
+
+    songsOfArtist = await audioQuery.searchSongs(
+        query: _searchText.text, sortType: SongSortType.ALPHABETIC_ARTIST);
   }
 
+  // final person = songs
+  //     .artist
+  //     .firstWhere((element) => element.name == personName, orElse: () {
+  //   return null;
+  // });
   final color = const Color(0xff284756);
 
   @override
@@ -47,6 +55,7 @@ class _SearchScreenState extends State<SearchScreen> {
       appBar: AppBar(
         backgroundColor: color,
         title: TextField(
+          style: TextStyle(color: Colors.white),
           controller: _searchText,
           onChanged: (value) {
             setState(
@@ -56,8 +65,8 @@ class _SearchScreenState extends State<SearchScreen> {
             );
           },
           decoration: InputDecoration(
-            border: OutlineInputBorder(),
             hintText: 'Enter a search',
+            hintStyle: TextStyle(fontSize: 20.0, color: Colors.white),
           ),
         ),
       ),
@@ -117,7 +126,7 @@ class _SearchScreenState extends State<SearchScreen> {
         ),
         title: Text(
           songs[index].title,
-          style: TextStyle(color: Colors.teal[200]),
+          style: TextStyle(color: Colors.teal[200], fontSize: 20),
         ),
         subtitle:
             Text(songs[index].artist, style: TextStyle(color: Colors.black)),
@@ -128,6 +137,7 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
           onPressed: () async {
             savedList = await Hive.openBox('Musicbox');
+
             var songFav = SongPlayList()..songInfo = songs[currentIndex].id;
 
             print(songs[currentIndex].id);
@@ -138,8 +148,14 @@ class _SearchScreenState extends State<SearchScreen> {
         onTap: () {
           print("object");
           int currentIndex = index;
-          MusicPlayer(
-            songInfo: songs[currentIndex],
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MusicPlayer(
+                songInfo: songs[currentIndex],
+                key: key,
+              ),
+            ),
           );
         },
       ),

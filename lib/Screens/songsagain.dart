@@ -8,7 +8,6 @@ import 'package:flutter_app2/Screens/Favourites.dart';
 import 'package:flutter_app2/model/hive_helper.dart';
 import 'package:flutter_app2/Screens/search.dart';
 import 'package:flutter_audio_query/flutter_audio_query.dart';
-import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_media_notification/flutter_media_notification.dart';
 import 'package:hive/hive.dart';
 import 'package:just_audio/just_audio.dart';
@@ -62,25 +61,7 @@ class SongsStateagain extends State<SongsAgain>
     getTracks();
 
     changeState();
-
-    // getNames();
-    // print(songs[4]);
-    // for (int i = 0; i < 1000; i++) {
-    //   usersList.add(songs[4].toString());
-    // }
-    // usersList.sort(
-    //   (a, b) {
-    //     return a.toLowerCase().compareTo(b.toLowerCase());
-    //   },
-    // );
   }
-// faker.person.name()
-//   getNames() {
-//
-// // faker.person.name() ////avoid theuserlistandaddSongsLISTto use//////
-//     //sort the list
-//
-//   }
 
   void getTracks() async {
     songs = await audioQuery.getSongs();
@@ -90,11 +71,14 @@ class SongsStateagain extends State<SongsAgain>
 
         changeState();
         // setSong(songs[currentIndex]);
+        //
+        MediaNotification.showNotification(
+          title: songs[currentIndex].title,
+          author: songs[currentIndex].artist,
+        );
 
         MediaNotification.setListener('play', () {
-          setState(
-            () => status = changeState(),
-          );
+          setState(() => status = changeState());
         });
 
         MediaNotification.setListener('pause', () {
@@ -203,36 +187,13 @@ class SongsStateagain extends State<SongsAgain>
     print("SetSongCurrentIndex $currentIndex");
   }
 
-  // final tabs = [
-  //   SafeArea(
-  //     child: SongsAgain(),
-  //   ),
-  //   SafeArea(
-  //     child: Favourites(),
-  //   ),
-  //   SafeArea(
-  //     child: SearchScreen(),
-  //   ),
-  // ];
-
   void dispose() {
     super.dispose();
     player?.dispose();
     _animControl.dispose();
   }
 
-  // void addMusic(SongPlayList musicName, ids) {
-  //   final musicBox = Hive.box('Musicbox');
-  //   musicBox.add(musicName);
-  // }
-
   var savedList;
-
-  // Future initiateHive() async {
-  //   ///Creating a HiveBox to Store data
-  //   savedList = await Hive.openBox('Musicbox');
-  //   print("Box opened");
-  // }
 
   int _selectedIndex = 0;
   Timer _timer;
@@ -458,7 +419,18 @@ class SongsStateagain extends State<SongsAgain>
                   ),
                 );
               },
-            )
+            ),
+            IconButton(
+              icon: Icon(Icons.sort),
+              color: Colors.teal[200],
+              onPressed: () {
+                setState(
+                  () {
+                    songs.sort();
+                  },
+                );
+              },
+            ),
           ],
           backgroundColor: color,
           leading: Icon(Icons.music_note, color: Colors.teal[200]),
@@ -760,7 +732,7 @@ class SongsStateagain extends State<SongsAgain>
               ),
               collapsed: Container(
                 child: Padding(
-                  padding: EdgeInsets.fromLTRB(0, 15, 0, 18),
+                  padding: EdgeInsets.fromLTRB(28, 15, 0, 18),
                   child: Column(
                     children: [
                       Row(
@@ -768,39 +740,54 @@ class SongsStateagain extends State<SongsAgain>
                           Container(
                             child: Row(
                               children: [
-                                IconButton(
-                                  icon: Icon(
-                                    Icons.skip_previous_outlined,
-                                    size: 50,
-                                    color: Colors.teal[200],
-                                  ),
-                                  onPressed: () {
-                                    changeTrack(true);
-                                    print("ChangeTrackTrueCalled");
-                                  },
+                                CircleAvatar(
+                                  backgroundImage: songs[currentIndex]
+                                              .albumArtwork ==
+                                          null
+                                      ? AssetImage(
+                                          'android/assets/images/gramaphoneIm.jpeg')
+                                      : FileImage(
+                                          File(
+                                              songs[currentIndex].albumArtwork),
+                                        ),
+                                  radius: 30,
                                 ),
-                                IconButton(
-                                  icon: Icon(
-                                      isPlaying
-                                          ? Icons.pause_circle_filled_rounded
-                                          : Icons.play_circle_fill_rounded,
-                                      color: Colors.red,
-                                      size: 50),
-                                  onPressed: () {
-                                    changeState();
-                                  },
-                                ),
-                                IconButton(
-                                  icon: Icon(
-                                    Icons.skip_next_outlined,
-                                    size: 50,
-                                    color: Colors.teal[200],
-                                  ),
-                                  onPressed: () {
-                                    changeTrack(false);
-                                    print("ChangeTrackFalseCalled");
-                                  },
-                                ),
+                                SizedBox(
+                                  width: 20,
+                                )
+                                // IconButton(
+                                //   icon: Icon(
+                                //     Icons.skip_previous_outlined,
+                                //     size: 50,
+                                //     color: Colors.teal[200],
+                                //   ),
+                                //   onPressed: () {
+                                //     changeTrack(true);
+                                //     print("ChangeTrackTrueCalled");
+                                //   },
+                                // ),
+                                // IconButton(
+                                //   icon: Icon(
+                                //       isPlaying
+                                //           ? Icons.pause_circle_filled_rounded
+                                //           : Icons.play_circle_fill_rounded,
+                                //       color: Colors.red,
+                                //       size: 50),
+                                //   onPressed: () {
+                                //     changeState();
+                                //   },
+                                // ),
+                                // IconButton(
+                                //   icon: Icon(
+                                //     Icons.skip_next_outlined,
+                                //     size: 50,
+                                //     color: Colors.teal[200],
+                                //   ),
+                                //   onPressed: () {
+                                //     changeTrack(false);
+                                //     print("ChangeTrackFalseCalled");
+                                //   },
+                                // ),
                               ],
                             ),
                           ),
@@ -834,20 +821,34 @@ class SongsStateagain extends State<SongsAgain>
                               ],
                             ),
                           ),
-                          Transform.rotate(
-                            angle: 270 * pi / 180,
-                            child: IconButton(
-                              icon: Icon(
-                                Icons.double_arrow_sharp,
-                                color: Colors.grey,
-                              ),
-                              onPressed: () {
-                                Scaffold.of(context).showSnackBar(SnackBar(
-                                  content: Text("Slide Up"),
-                                ));
-                              },
-                            ),
+                          IconButton(
+                            padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                            icon: Icon(
+                                isPlaying
+                                    ? Icons.pause_circle_filled_rounded
+                                    : Icons.play_circle_fill_rounded,
+                                color: Colors.red,
+                                size: 50),
+                            onPressed: () {
+                              changeState();
+                            },
                           ),
+                          // Transform.rotate(
+                          //   angle: 270 * pi / 180,
+                          //   child: IconButton(
+                          //     icon: Icon(
+                          //       Icons.double_arrow_sharp,
+                          //       color: Colors.grey,
+                          //     ),
+                          //     onPressed: () {
+                          //       Scaffold.of(context).showSnackBar(
+                          //         SnackBar(
+                          //           content: Text("Slide Up"),
+                          //         ),
+                          //       );
+                          //     },
+                          //   ),
+                          // ),
                         ],
                       ),
                     ],
@@ -919,82 +920,79 @@ class SongsStateagain extends State<SongsAgain>
   }
 
   Widget _buildListViewSongs() {
-    return Scrollbar(
-      radius: Radius.circular(25),
-      child: DraggableScrollbar.semicircle(
-        labelTextBuilder: (double offset) => Text("${offset ~/ 40}"),
+    return DraggableScrollbar.semicircle(
+      labelTextBuilder: (double offset) => Text("${offset ~/ 40}"),
 
-        // labelTextBuilder: (offset) {
-        //   final int currentItem = offset ~/ 100;
-        //   var letter = currentItem <= usersList.length - 1
-        //       ? usersList[currentItem].substring(0, 1)
-        //       : usersList.last.substring(0, 1);
-        //   return Text("$letter");
-        // },
+      // labelTextBuilder: (offset) {
+      //   final int currentItem = offset ~/ 40;
+      //   var letter = currentItem <= usersList.length - 1
+      //       ? usersList[currentItem].substring(0, 1)
+      //       : usersList.last.substring(0, 1);
+      //   return Text("$letter");
+      // },
 
+      controller: _scroll,
+      child: ListView.separated(
         controller: _scroll,
-        child: ListView.separated(
-          controller: _scroll,
-          separatorBuilder: (context, index) => Divider(),
-          itemCount: songs.length,
-          itemBuilder: (context, index) => ListTile(
-            leading: CircleAvatar(
-              backgroundImage: songs[index].albumArtwork == null
-                  ? AssetImage(
-                      'android/assets/images/Apple-Music-artist-promo.jpg')
-                  : FileImage(
-                      File(songs[index].albumArtwork),
-                    ),
-            ),
-            title: Text(
-              songs[index].title,
-              style: TextStyle(color: Colors.white),
-            ),
-            subtitle: Text(songs[index].artist,
-                style: TextStyle(color: Colors.white)),
-            trailing: IconButton(
-              icon: Icon(
-                Icons.favorite_outline,
-                color: Colors.teal[200],
-              ),
-              onPressed: () async {
-                savedList = await Hive.openBox('Musicbox');
-
-                var songFav = SongPlayList()..songInfo = songs[currentIndex].id;
-
-                print(songs[currentIndex].id);
-
-                savedList.put(songs[currentIndex].id, songFav);
-
-                print("saved savedList");
-
-                Scaffold.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text("Added to Favorite"),
+        separatorBuilder: (context, index) => Divider(),
+        itemCount: songs.length,
+        itemBuilder: (context, index) => ListTile(
+          leading: CircleAvatar(
+            backgroundImage: songs[index].albumArtwork == null
+                ? AssetImage(
+                    'android/assets/images/Apple-Music-artist-promo.jpg')
+                : FileImage(
+                    File(songs[index].albumArtwork),
                   ),
-                );
-              },
+          ),
+          title: Text(
+            songs[index].title,
+            style: TextStyle(color: Colors.white, fontSize: 16),
+          ),
+          subtitle:
+              Text(songs[index].artist, style: TextStyle(color: Colors.white)),
+          trailing: IconButton(
+            icon: Icon(
+              Icons.favorite_outline,
+              color: Colors.teal[200],
             ),
-            onTap: () {
-              currentIndex = index;
+            onPressed: () async {
+              savedList = await Hive.openBox('Musicbox');
 
-              print("index $index");
+              var songFav = SongPlayList()..songInfo = songs[currentIndex].id;
 
-              print("current index $currentIndex");
+              print(songs[currentIndex].id);
 
-              SongsAgain(songInfo: songs[currentIndex], key: key);
+              savedList.put(songs[currentIndex].id, songFav);
 
-              print(currentIndex);
+              print("saved savedList");
 
-              setNameOntap(songs[currentIndex].title);
-              setArtistOntap(songs[currentIndex].artist);
-
-              setSong(
-                songs[currentIndex],
+              Scaffold.of(context).showSnackBar(
+                SnackBar(
+                  content: Text("Added to Favorite"),
+                ),
               );
-              // widget.pauseplayer();
             },
           ),
+          onTap: () {
+            currentIndex = index;
+
+            print("index $index");
+
+            print("current index $currentIndex");
+
+            SongsAgain(songInfo: songs[currentIndex], key: key);
+
+            print(currentIndex);
+
+            setNameOntap(songs[currentIndex].title);
+            setArtistOntap(songs[currentIndex].artist);
+
+            setSong(
+              songs[currentIndex],
+            );
+            // widget.pauseplayer();
+          },
         ),
       ),
     );
