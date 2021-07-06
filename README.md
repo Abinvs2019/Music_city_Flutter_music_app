@@ -1,16 +1,21 @@
-# flutter_app2
+# musiccity
 
-A new Flutter application.
+A complete Music Player Build in Flutter
 
-## Getting Started
 
-This project is a starting point for a Flutter application.
+The App inclues :-
 
-A few resources to get you started if this is your first Flutter project:
+            Fetching all the music Files from the local Storage
+            Play/Pause/Seek
+            Adding to Favourites
+            Includes Local database (Hive database)
+            Cool UI 
+            Minimalistic Design
+            Sleep Timer
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+Planning More Updates
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Screenshots:-
+
+      
+           
